@@ -39,6 +39,8 @@ Open a pull request into `main` when the branch is ready.
 
 GitHub Actions runs the same command on pushes and pull requests.
 
+GitHub branch protection/ruleset enforcement for this private personal repo is currently unavailable through the API on this account plan. Treat CI as mandatory by team practice until GitHub branch protection is available.
+
 ## Updating From Upstream
 
 ```powershell

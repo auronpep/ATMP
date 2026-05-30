@@ -62,12 +62,23 @@
 - [x] Add local CI runner script.
 - [x] Add Git pipeline guide.
 - [x] Run local CI-equivalent verification.
-- [ ] Push CI setup to private origin.
-- [ ] Try to configure `main` branch protection or document the GitHub plan limitation.
-- [ ] Verify the pushed workflow and final GitHub state.
+- [x] Push CI setup to private origin.
+- [x] Try to configure `main` branch protection or document the GitHub plan limitation.
+- [x] Verify the pushed workflow and final GitHub state.
 
 ### Local CI Verification
 
 - `pwsh -NoProfile -File C:\ATMP\scripts\Run-CI.ps1` passed.
 - Steps covered: `uv sync --frozen`, Python `3.11.15`, compile check for `app`, `webui`, and `main.py`, and `python -m unittest discover -s test`.
 - Test result: `51` tests run, `3` skipped, `OK`.
+
+### GitHub CI Verification
+
+- Initial workflow run `26677189313` failed before project checks because `astral-sh/setup-uv@v8` did not resolve as a major tag.
+- Workflow actions were pinned to exact tags verified through GitHub API:
+  - `actions/checkout@v6.0.2`
+  - `actions/setup-python@v6.2.0`
+  - `astral-sh/setup-uv@v8.1.0`
+- Follow-up workflow run `26677208376` passed on GitHub Actions; job `ci` completed successfully in about `1m27s`.
+- Classic branch protection and repository rulesets both returned GitHub `403`: `Upgrade to GitHub Pro or make this repository public to enable this feature.`
+- Until the GitHub plan supports enforcement, the team rule is: open PRs into `main` and require the `CI / ci` workflow result by practice.
