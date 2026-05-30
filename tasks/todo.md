@@ -55,3 +55,19 @@
   - `erewhonsgroup`, invitation id `320648154`, permission `admin`
   - `VoteWood`, invitation id `320648155`, permission `admin`
   - `JWoodMedia`, invitation id `320648156`, permission `admin`
+
+## CI Pipeline Hardening
+
+- [x] Add GitHub Actions CI workflow.
+- [x] Add local CI runner script.
+- [x] Add Git pipeline guide.
+- [x] Run local CI-equivalent verification.
+- [ ] Push CI setup to private origin.
+- [ ] Try to configure `main` branch protection or document the GitHub plan limitation.
+- [ ] Verify the pushed workflow and final GitHub state.
+
+### Local CI Verification
+
+- `pwsh -NoProfile -File C:\ATMP\scripts\Run-CI.ps1` passed.
+- Steps covered: `uv sync --frozen`, Python `3.11.15`, compile check for `app`, `webui`, and `main.py`, and `python -m unittest discover -s test`.
+- Test result: `51` tests run, `3` skipped, `OK`.
