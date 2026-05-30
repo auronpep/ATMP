@@ -38,3 +38,20 @@
 - Web UI listener: `127.0.0.1:8501`
 - API listener: `0.0.0.0:8080`
 - Full video generation will still require real provider keys in ignored `config.toml`, especially material-source keys such as Pexels or Pixabay and an LLM provider key unless a local/providerless route is selected.
+
+## Collaborator Admin Setup
+
+- [x] Verify `auronpep/ATMP` is still private before collaborator writes.
+- [x] Add `erewhonsgroup` with `admin` permission.
+- [x] Add `votewood` with `admin` permission.
+- [x] Add `JWoodMedia` with `admin` permission.
+- [x] Verify active collaborators and pending invitations separately.
+
+### Collaborator Verification
+
+- Repo privacy check: `auronpep/ATMP` reports `visibility=PRIVATE`, `isPrivate=true`, and current viewer permission `ADMIN`.
+- Active collaborators currently include only `auronpep`; the three new accounts have not accepted yet.
+- Pending, non-expired admin invitations created on `2026-05-30T05:48:44Z`:
+  - `erewhonsgroup`, invitation id `320648154`, permission `admin`
+  - `VoteWood`, invitation id `320648155`, permission `admin`
+  - `JWoodMedia`, invitation id `320648156`, permission `admin`
