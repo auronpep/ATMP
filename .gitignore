@@ -26,6 +26,9 @@ node_modules
 
 venv/
 .venv
+.cache/
+.local/
+.tmp/
 
 # Debug and test files
 CLAUDE.md
