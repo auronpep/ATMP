@@ -82,3 +82,11 @@
 - Follow-up workflow run `26677208376` passed on GitHub Actions; job `ci` completed successfully in about `1m27s`.
 - Classic branch protection and repository rulesets both returned GitHub `403`: `Upgrade to GitHub Pro or make this repository public to enable this feature.`
 - Until the GitHub plan supports enforcement, the team rule is: open PRs into `main` and require the `CI / ci` workflow result by practice.
+
+## BarMatrix Persona Architecture
+
+- [x] Capture correction that promotional personas should be people inside law school and bar-prep environments, not coaches.
+- [ ] Define the first six environment personas.
+- [ ] Write reusable persona specs for MoneyPrinterTurbo content generation.
+- [ ] Add review notes for tone, claims, and BarMatrix CTA boundaries.
+- [ ] Verify the persona specs are usable with the local content workflow.
