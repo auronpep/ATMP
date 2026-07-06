@@ -90,3 +90,25 @@
 - [ ] Write reusable persona specs for MoneyPrinterTurbo content generation.
 - [ ] Add review notes for tone, claims, and BarMatrix CTA boundaries.
 - [ ] Verify the persona specs are usable with the local content workflow.
+
+## Upstream v1.3.1 Merge - 2026-07-06
+
+- [x] Verify upstream `harry0703/MoneyPrinterTurbo` release `v1.3.1` and fetch upstream tags.
+- [x] Reconcile local `main` with private `origin/main` before applying upstream changes.
+- [x] Compare fork changes against upstream `v1.3.1`.
+- [x] Merge upstream `v1.3.1` and resolve conflicts carefully.
+- [x] Run existing smoke tests.
+- [x] Document changed surface area, verification, and follow-up risk.
+
+### Review
+
+- Upstream release verified: `harry0703/MoneyPrinterTurbo` `v1.3.1`, published `2026-07-06T02:34:46Z`, tag commit `6dce9eaea4f9914a4af682339a034c146d52205c`.
+- Private fork reconciled first: local `main` fast-forwarded to `origin/main` commit `8e326e2a217840702916223c1a4d23b7132490d9`.
+- Merge commit created locally: `d06f3e6` (`Merge tag 'v1.3.1'`); `v1.3.1` is now an ancestor of local `main`.
+- Conflict resolved in `.github/workflows/ci.yml`: preserved ATMP's Windows CI, pinned GitHub Action versions, native `ffmpeg`/ImageMagick install, concurrency, and `scripts/Run-CI.ps1` smoke entrypoint instead of replacing it with upstream's narrower Ubuntu-only workflow.
+- Smoke script updated in `scripts/Run-CI.ps1` so compile coverage now includes new upstream `cli.py`.
+- Main upstream surface brought in: pure CLI workflow, new LLM providers (`aimlapi`, `evolink`, `volcengine`), ElevenLabs and Chatterbox TTS, optional TwelveLabs reranking, Upload-Post YouTube Shorts support, GHCR Docker workflow, updated Docker/release compose files, expanded WebUI parameters, Spanish/Indonesian i18n, Azure voice data extraction, sponsor asset reorganization, dependency lock updates, and expanded tests.
+- Verification passed: `pwsh -NoProfile -File .\scripts\Run-CI.ps1` completed `uv sync --frozen`, Python `3.11.15`, compile check for `app webui cli.py main.py`, and `183` unit tests with `7` skipped, `OK`.
+- Follow-up risk: smoke tests cover deterministic/unit behavior only; real provider paths still need configured API keys and live checks for ElevenLabs, Chatterbox, TwelveLabs, Upload-Post, and the new LLM providers.
+- Follow-up risk: CI has not been pushed or run on GitHub yet, so the preserved Windows workflow should be validated remotely after pushing.
+- Follow-up risk: upstream moved/deleted docs and sponsor assets; confirm no downstream local docs link to the old root-level sponsor image paths.
