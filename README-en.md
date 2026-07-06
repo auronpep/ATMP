@@ -8,7 +8,7 @@
   <a href="https://github.com/harry0703/MoneyPrinterTurbo/blob/main/LICENSE"><img src="https://img.shields.io/github/license/harry0703/MoneyPrinterTurbo.svg?style=for-the-badge" alt="License"></a>
 </p>
 
-<h3>English | <a href="README.md">简体中文</a></h3>
+<h3>English | <a href="README.md">简体中文</a> | <a href="README-ar.md">العربية</a></h3>
 
 <div align="center">
   <a href="https://trendshift.io/repositories/8731" target="_blank"><img src="https://trendshift.io/api/badge/repositories/8731" alt="harry0703%2FMoneyPrinterTurbo | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
@@ -27,24 +27,76 @@ materials, video subtitles, and video background music before synthesizing a hig
 
 </div>
 
+## Special Thanks 🙏
+
+<table align="center">
+  <tr>
+    <td align="center" width="160">
+      <a href="https://www.byteplus.com/en/product/modelark?utm_campaign=hw&utm_content=MoneyPrinterTurbo&utm_medium=devrel_tool_web&utm_source=OWO&utm_term=MoneyPrinterTurbo"><img src="docs/sponsors/byteplus-logo.svg" alt="BytePlus" height="25"></a><br>
+      <a href="https://www.byteplus.com/en/product/modelark?utm_campaign=hw&utm_content=MoneyPrinterTurbo&utm_medium=devrel_tool_web&utm_source=OWO&utm_term=MoneyPrinterTurbo"><strong>BytePlus ModelArk</strong></a>
+    </td>
+    <td align="left">
+      <sub>Thanks to Dola Seed for sponsoring this project! <a href="https://www.byteplus.com/en/product/modelark?utm_campaign=hw&utm_content=MoneyPrinterTurbo&utm_medium=devrel_tool_web&utm_source=OWO&utm_term=MoneyPrinterTurbo">Dola Seed 2.0</a> is a full-modal general large model independently developed by ByteDance for the global market. Built on a unified multimodal architecture, it supports joint understanding and generation of text, images, audio, and video. It natively enables agent collaboration, with strong reasoning, long-task execution, tool integration, and coding capabilities. Register via this link to get 500,000 tokens of free inference quota per model.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://www.ccsub.net/register?ref=VCVDAWWY"><img src="docs/sponsors/ccsub-logo.png" alt="CCSub" height="36"></a><br>
+      <a href="https://www.ccsub.net/register?ref=VCVDAWWY"><strong>CCSub</strong></a>
+    </td>
+    <td align="left">
+      <sub>Thanks to <a href="https://www.ccsub.net/register?ref=VCVDAWWY">CCSub</a> for sponsoring this project! CCSub is a stable, affordable AI API relay platform — your drop-in replacement for a Claude.ai subscription. One API key gives you access to Claude Opus 4.8, Sonnet, Haiku, GPT-5, and Gemini at roughly 30% of direct API cost, with no VPN required from anywhere in the world. Compatible with Claude Code, Codex, Cursor, Cline, Continue, Windsurf, and all major AI coding tools. Register at <a href="https://www.ccsub.net/register?ref=VCVDAWWY">www.ccsub.net</a> and get $5 free credit on sign-up.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://www.compshare.cn/coding-plan?ytag=GPU_YY-git_MoneyPrinterTu"><img src="docs/sponsors/compshare-logo.png" alt="Compshare" height="34"></a><br>
+      <a href="https://www.compshare.cn/coding-plan?ytag=GPU_YY-git_MoneyPrinterTu"><strong>Compshare</strong></a>
+    </td>
+    <td align="left">
+      <sub>Thanks to <a href="https://www.compshare.cn/coding-plan?ytag=GPU_YY-git_MoneyPrinterTu">Compshare</a> for sponsoring this project! Compshare is an AI cloud platform under UCloud that provides one-stop API access to mainstream Chinese and international models with a single key. Its CodingPlan package focuses on cost-effective Chinese models such as GLM5.2 and Deepseek-v4, while also offering stable official relay channels for overseas models across different development scenarios. It is compatible with Claude Code, Codex, and other mainstream AI coding tools and general API calls, with enterprise-grade high concurrency, 24/7 technical support, and self-service invoicing. <a href="https://www.compshare.cn/coding-plan?ytag=GPU_YY-git_MoneyPrinterTu">Register now</a> to receive up to ¥10 in free trial credits.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://reccloud.com"><img src="docs/sponsors/reccloud-logo.svg" alt="RecCloud" height="36"></a><br>
+      <a href="https://reccloud.com"><strong>RecCloud</strong></a>
+    </td>
+    <td align="left">
+      <sub>Due to the <strong>deployment</strong> and <strong>usage</strong> of this project, there is a certain threshold for some beginner users. We would like to express our special thanks to <a href="https://reccloud.com">RecCloud (AI-Powered Multimedia Service Platform)</a> for providing a free <code>AI Video Generator</code> service based on this project. It allows for online use without deployment, which is very convenient.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://picwish.com"><img src="docs/sponsors/picwish-logo.svg" alt="Picwish" height="36"></a><br>
+      <a href="https://picwish.com"><strong>Picwish</strong></a>
+    </td>
+    <td align="left">
+      <sub>Thanks to <a href="https://picwish.com">Picwish</a> for supporting and sponsoring this project, enabling continuous updates and maintenance. Picwish focuses on the <strong>image processing field</strong>, providing a rich set of <strong>image processing tools</strong> that extremely simplify complex operations, truly making image processing easier.</sub>
+    </td>
+  </tr>
+</table>
+
 ## Features 🎯
 
 - [x] Complete **MVC architecture**, **clearly structured** code, easy to maintain, supports both `API`
-  and `Web interface`
+      and `Web interface`
 - [x] Supports **AI-generated** video copy, as well as **customized copy**
 - [x] Supports various **high-definition video** sizes
-    - [x] Portrait 9:16, `1080x1920`
-    - [x] Landscape 16:9, `1920x1080`
+  - [x] Portrait 9:16, `1080x1920`
+  - [x] Landscape 16:9, `1920x1080`
 - [x] Supports **batch video generation**, allowing the creation of multiple videos at once, then selecting the most
-  satisfactory one
+      satisfactory one
 - [x] Supports setting the **duration of video clips**, facilitating adjustments to material switching frequency
 - [x] Supports video copy in both **Chinese** and **English**
 - [x] Supports **multiple voice** synthesis, with **real-time preview** of effects
 - [x] Supports **subtitle generation**, with adjustable `font`, `position`, `color`, `size`, and also
-  supports `subtitle outlining`
+      supports `subtitle outlining`
 - [x] Supports **background music**, either random or specified music files, with adjustable `background music volume`
 - [x] Video material sources are **high-definition** and **royalty-free**, and you can also use your own **local materials**
-- [x] Supports integration with various models such as **OpenAI**, **Moonshot**, **Azure**, **gpt4free**, **one-api**, **Qwen**, **Google Gemini**, **Ollama**, **DeepSeek**, **MiniMax**, **ERNIE**, **Pollinations**, **ModelScope** and more
+- [x] Supports multiple stock video providers: **Pexels**, **Pixabay**, and **Coverr**
+- [x] Optional **TwelveLabs** video AI integration: use **Marengo** embeddings to semantically rank B-roll search terms against your subject, and **Pegasus** to QA/describe clips ([TwelveLabs API key](https://twelvelabs.io))
+- [x] Supports integration with various models such as **OpenAI**, **AIHubMix**, **AIML API**, **EvoLink**, **Moonshot**, **Azure**, **gpt4free**, **one-api**, **Qwen**, **Google Gemini**, **Ollama**, **DeepSeek**, **MiniMax**, **ERNIE**, **Pollinations**, **ModelScope** and more
 
 ## Video Demos 📺
 
@@ -87,11 +139,11 @@ materials, video subtitles, and video background music before synthesizing a hig
 - Recommended platforms: Windows 10+, macOS 11+, or a mainstream Linux distribution
 - A GPU is not required, but it is recommended if you want faster local transcription, faster video processing, or smoother batch generation
 
-| Item | Minimum | Recommended | Optimal |
-| --- | --- | --- | --- |
-| CPU | 4 cores | 6 to 8 cores | 8+ cores |
-| RAM | 4 GB | 8 GB | 16+ GB |
-| GPU | Not required | 4+ GB VRAM | 8+ GB VRAM |
+| Item | Minimum      | Recommended  | Optimal    |
+| ---- | ------------ | ------------ | ---------- |
+| CPU  | 4 cores      | 6 to 8 cores | 8+ cores   |
+| RAM  | 4 GB         | 8 GB         | 16+ GB     |
+| GPU  | Not required | 4+ GB VRAM   | 8+ GB VRAM |
 
 - If you mainly rely on cloud LLMs, cloud TTS, and online material sources, CPU and RAM matter more than GPU
 - If you use `faster-whisper`, batch generation, or heavier local processing, a GPU will improve throughput noticeably
@@ -104,17 +156,17 @@ materials, video subtitles, and video background music before synthesizing a hig
 - MacOS / Linux users: use `uv sync --frozen` for the primary local setup path
 - If you want a more isolated runtime: use Docker deployment
 
-### Run in Google Colab 
+### Run in Google Colab
+
 Want to try MoneyPrinterTurbo without setting up a local environment? Run it directly in Google Colab!
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/harry0703/MoneyPrinterTurbo/blob/main/docs/MoneyPrinterTurbo.ipynb)
 
-
 ### Windows
 
-The downloadable package is still the older `v1.2.6` bundled build. After downloading, run `update.bat` first to bring it up to the latest code.
+Download the latest Windows one-click package from GitHub Releases, then extract it directly.
 
-Google Drive (v1.2.6): https://drive.google.com/file/d/1HsbzfT7XunkrCrHw5ncUjFX8XX4zAuUh/view?usp=sharing
+- GitHub Release: https://github.com/harry0703/MoneyPrinterTurbo/releases/latest
 
 After downloading, it is recommended to **double-click** `update.bat` first to update to the **latest code**, then double-click `start.bat` to launch
 
@@ -152,10 +204,12 @@ If you are using a Windows system, please refer to Microsoft's documentation:
 
 ```shell
 cd MoneyPrinterTurbo
-docker-compose up
+docker compose -f docker-compose.release.yml up
 ```
 
-> Note：The latest version of docker will automatically install docker compose in the form of a plug-in, and the start command is adjusted to `docker compose up `
+> The recommended default is `docker-compose.release.yml`, which pulls the prebuilt image from GitHub Container Registry: `ghcr.io/harry0703/moneyprinterturbo:latest`.
+> If you need to build the image locally, you can still run `docker compose up`.
+> Before the first start, make sure `config.toml` exists in the project root. You can copy it from `config.example.toml`.
 
 #### ② Access the Web Interface
 
@@ -163,7 +217,7 @@ Open your browser and visit http://127.0.0.1:8501
 
 #### ③ Access the API Interface
 
-Open your browser and visit http://0.0.0.0:8080/docs Or http://0.0.0.0:8080/redoc
+Open your browser and visit http://127.0.0.1:8080/docs or http://127.0.0.1:8080/redoc
 
 ### Manual Deployment 📦
 
@@ -187,37 +241,12 @@ pip install -r requirements.txt
 ```
 
 Notes:
+
 - `pyproject.toml` is now the primary dependency manifest.
 - `uv.lock` pins the resolved environment, so `uv sync --frozen` is recommended by default.
 - `requirements.txt` is kept only for legacy `pip`-based installation.
 
-#### ② Install ImageMagick
-
-###### Windows:
-
-- Download https://imagemagick.org/script/download.php Choose the Windows version, make sure to select the **static library** version, such as ImageMagick-7.1.1-32-Q16-x64-**static**.exe
-- Install the downloaded ImageMagick, **do not change the installation path**
-- Modify the `config.toml` configuration file, set `imagemagick_path` to your actual installation path
-
-###### MacOS:
-
-```shell
-brew install imagemagick
-```
-
-###### Ubuntu
-
-```shell
-sudo apt-get install imagemagick
-```
-
-###### CentOS
-
-```shell
-sudo yum install ImageMagick
-```
-
-#### ③ Launch the Web Interface 🌐
+#### ② Launch the Web Interface 🌐
 
 Note that you need to execute the following commands in the `root directory` of the MoneyPrinterTurbo project
 
@@ -234,7 +263,7 @@ To allow other devices on your LAN to access the WebUI, run `set MPT_WEBUI_HOST=
 ###### MacOS or Linux
 
 ```shell
-uv run streamlit run ./webui/Main.py --browser.gatherUsageStats=False
+uv run streamlit run ./webui/Main.py --browser.gatherUsageStats=False --server.showEmailPrompt=False
 ```
 
 If you have already activated the virtual environment manually, you can still run:
@@ -245,7 +274,7 @@ sh webui.sh
 
 After launching, the browser will open automatically
 
-#### ④ Launch the API Service 🚀
+#### ③ Launch the API Service 🚀
 
 ```shell
 uv run python main.py
@@ -257,44 +286,48 @@ If you have already activated the virtual environment manually, you can still ru
 python main.py
 ```
 
-## Special Thanks 🙏
+#### ④ Pure CLI Mode (No Browser) ⌨️
 
-Due to the **deployment** and **usage** of this project, there is a certain threshold for some beginner users. We would
-like to express our special thanks to
+If you cannot use a browser or port forwarding, you can generate videos directly from the command line:
 
-**RecCloud (AI-Powered Multimedia Service Platform)** for providing a free `AI Video Generator` service based on this
-project. It allows for online use without deployment, which is very convenient.
+```shell
+uv run python cli.py --video-subject "The Role of Money"
+```
 
-- Chinese version: https://reccloud.cn
-- English version: https://reccloud.com
+You can also provide local materials and control the stop stage:
 
-![](docs/reccloud.com.jpg)
-
-## Thanks for Sponsorship 🙏
-
-Thanks to Picwish https://picwish.com for supporting and sponsoring this project, enabling continuous updates and maintenance.
-
-Picwish focuses on the **image processing field**, providing a rich set of **image processing tools** that extremely simplify complex operations, truly making image processing easier.
-
-![picwish.jpg](docs/picwish.com.jpg)
-
-After launching, you can view the `API documentation` at http://127.0.0.1:8080/docs and directly test the interface
-online for a quick experience.
+```shell
+uv run python cli.py \
+  --video-subject "The Role of Money" \
+  --video-source local \
+  --video-materials "1.mp4,2.mp4" \
+  --stop-at video
+```
 
 ## Voice Synthesis 🗣
 
 A list of all supported voices can be viewed here: [Voice List](./docs/voice-list.txt)
 
-2024-04-16 v1.1.2 Added 9 new Azure voice synthesis voices that require API KEY configuration. These voices sound more realistic.
+The default TTS provider is **Edge TTS** (free, no API key required). In the WebUI it appears as **"Azure TTS V1"** — this is the same thing. To switch voices, set `voice_name` in `config.toml` or select one from the WebUI voice dropdown.
+
+> **Note:** "Azure TTS V1" (Edge TTS, free) and "Azure TTS V2" (paid Azure Speech SDK) are two different options in the WebUI. Only V2 requires an Azure API key.
+
+To use higher-quality **Azure TTS V2** voices, configure your Azure Speech credentials in `config.toml`:
+
+```toml
+[azure]
+speech_key = "your-azure-speech-key"
+speech_region = "eastus"
+```
+
+Azure TTS V2 voices require an [Azure Speech Services](https://portal.azure.com/) subscription. The 9 Azure voices added in v1.1.2 sound noticeably more natural than Edge TTS for most use cases.
 
 ## Subtitle Generation 📜
 
 Currently, there are 2 ways to generate subtitles:
 
-- **edge**: Faster generation speed, better performance, no specific requirements for computer configuration, but the
-  quality may be unstable
-- **whisper**: Slower generation speed, poorer performance, specific requirements for computer configuration, but more
-  reliable quality
+- **edge**: Uses Edge TTS timestamps to align subtitles. Fast, no GPU required, works on any machine. Accuracy depends on the TTS timing signal — occasionally misaligns on complex sentences.
+- **whisper**: Runs `faster-whisper` locally to transcribe the generated audio and produce word-level timestamps. Slower (a few seconds to ~1 minute per clip on CPU depending on model size), requires downloading a model (~250 MB for `large-v3-turbo`, ~3 GB for `large-v3`), but produces more accurate subtitles regardless of TTS provider.
 
 You can switch between them by modifying the `subtitle_provider` in the `config.toml` configuration file
 
@@ -330,6 +363,7 @@ MoneyPrinterTurbo
 ## Background Music 🎵
 
 Background music for videos is located in the project's `resource/songs` directory.
+
 > The current project includes some default music from YouTube videos. If there are copyright issues, please delete
 > them.
 
@@ -361,23 +395,9 @@ ffmpeg_path = "C:\\Users\\harry\\Downloads\\ffmpeg.exe"
 
 ### ❓ImageMagick is not installed on your computer
 
-[issue 33](https://github.com/harry0703/MoneyPrinterTurbo/issues/33)
-
-1. Follow the `example configuration` provided `download address` to
-   install https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-30-Q16-x64-static.exe, using the static library
-2. Do not install in a path with Chinese characters to avoid unpredictable issues
-
-[issue 54](https://github.com/harry0703/MoneyPrinterTurbo/issues/54#issuecomment-2017842022)
-
-For Linux systems, you can manually install it, refer to https://cn.linux-console.net/?p=16978
-
-Thanks to [@wangwenqiao666](https://github.com/wangwenqiao666) for their research and exploration
-
-### ❓ImageMagick's security policy prevents operations related to temporary file @/tmp/tmpur5hyyto.txt
-
-You can find these policies in ImageMagick's configuration file policy.xml.
-This file is usually located in /etc/ImageMagick-`X`/ or a similar location in the ImageMagick installation directory.
-Modify the entry containing `pattern="@"`, change `rights="none"` to `rights="read|write"` to allow read and write operations on files.
+> **This error no longer applies to the current version.**
+>
+> Since the project upgraded to **MoviePy 2.x**, subtitle rendering uses **Pillow** instead of ImageMagick. You do not need to install ImageMagick. If you are seeing this error, you may be running an older version of the code — run `git pull` to update, or use `update.bat` on Windows.
 
 ### ❓OSError: [Errno 24] Too many open files
 
@@ -397,16 +417,20 @@ ulimit -n 10240
 
 ### ❓Whisper model download failed, with the following error
 
-LocalEntryNotfoundEror: Cannot find an appropriate cached snapshotfolderfor the specified revision on the local disk and
-outgoing trafic has been disabled.
-To enablerepo look-ups and downloads online, pass 'local files only=False' as input.
+```
+LocalEntryNotFoundError: Cannot find an appropriate cached snapshot folder for the specified revision on the local disk and
+outgoing traffic has been disabled.
+To enable repo look-ups and downloads online, pass 'local_files_only=False' as input.
+```
 
 or
 
+```
 An error occurred while synchronizing the model Systran/faster-whisper-large-v3 from the Hugging Face Hub:
 An error happened while trying to locate the files on the Hub and we cannot find the appropriate snapshot folder for the
 specified revision on the local disk. Please check your internet connection and try again.
 Trying to load the model directly from the local cache, if it exists.
+```
 
 Solution: [Click to see how to manually download the model from netdisk](#subtitle-generation-)
 

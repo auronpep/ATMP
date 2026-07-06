@@ -48,7 +48,7 @@ try {
     }
 
     Invoke-NativeStep "python version" { uv run python --version }
-    Invoke-NativeStep "compile check" { uv run python -m compileall -q app webui main.py }
+    Invoke-NativeStep "compile check" { uv run python -m compileall -q app webui cli.py main.py }
     Invoke-NativeStep "unit tests" { uv run python -m unittest discover -s test }
 }
 finally {
