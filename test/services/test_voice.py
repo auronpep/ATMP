@@ -18,7 +18,7 @@ from app.services import voice as vs
 from app.services import task as task_service
 from pydub import AudioSegment
 
-temp_dir = utils.storage_dir("temp")
+temp_dir = utils.storage_dir("temp", create=True)
 
 text_en = """
 What is the meaning of life? 
