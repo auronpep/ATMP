@@ -17,7 +17,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_NAME: ghcr.io/harry0703/moneyprinterturbo
+  # Push to this repository's own namespace (metadata-action lowercases it).
+  # Hardcoding the upstream namespace (harry0703/moneyprinterturbo) breaks on
+  # forks: GITHUB_TOKEN has no push rights there -> "permission_denied".
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
 
 jobs:
   publish:
