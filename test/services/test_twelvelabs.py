@@ -105,6 +105,35 @@ class TestTwelveLabsService(unittest.TestCase):
         # any failure must preserve the original order (never make things worse)
         self.assertEqual(result, terms)
 
+    def test_cosine_rejects_mismatched_dimensions(self):
+        # zip() truncates to the shorter vector while the norms use the full
+        # ones, so [1,0,0,0] vs [1,0] used to score a perfect 1.0.
+        self.assertEqual(twelvelabs._cosine([1.0, 0.0, 0.0, 0.0], [1.0, 0.0]), 0.0)
+        self.assertEqual(twelvelabs._cosine([3.0, 4.0], [3.0, 4.0, 99.0]), 0.0)
+
+    def test_cosine_still_scores_equal_length_vectors(self):
+        self.assertAlmostEqual(twelvelabs._cosine([1.0, 0.0], [1.0, 0.0]), 1.0)
+        self.assertAlmostEqual(twelvelabs._cosine([1.0, 0.0], [0.0, 1.0]), 0.0)
+
+    def test_rerank_falls_back_when_embedding_dimensions_differ(self):
+        config.app["twelvelabs_api_keys"] = ["tlk_test"]
+        config.app["twelvelabs_rerank_terms"] = True
+
+        # A shorter vector that matches the subject's leading components would
+        # score 1.0 under truncation and wrongly win the ranking.
+        vectors = {
+            "city skyline": [1.0, 0.0, 0.0],
+            "cute kitten": [1.0, 0.0],
+            "downtown buildings": [0.9, 0.1, 0.0],
+        }
+        client = self._client_returning(vectors)
+
+        terms = ["cute kitten", "downtown buildings"]
+        with patch.object(twelvelabs, "_client", return_value=client):
+            result = twelvelabs.rerank_terms_by_subject("city skyline", terms)
+
+        self.assertEqual(result, terms)
+
     def test_rerank_noop_for_single_term(self):
         config.app["twelvelabs_api_keys"] = ["tlk_test"]
         config.app["twelvelabs_rerank_terms"] = True
