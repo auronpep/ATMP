@@ -1726,7 +1726,16 @@ if start_button:
         params.video_materials = []
         persisted_local_materials = []
         for file in uploaded_files:
-            file_path = os.path.join(local_videos_dir, f"{file.file_id}_{file.name}")
+            # file.name 是客户端提供的原始文件名，Streamlit 只是原样存进
+            # UploadedFileRec(name=upload.filename or "")，不做任何清洗。
+            # 直接拼进路径时，"../../evil.mp4" 会写到 local_videos 之外。
+            # 这里只保留纯文件名，和 API 上传接口的处理保持一致。
+            safe_name = os.path.basename(
+                str(file.name or "").replace("\\", "/").rstrip("/")
+            ).strip()
+            if safe_name in ("", ".", ".."):
+                safe_name = "material"
+            file_path = os.path.join(local_videos_dir, f"{file.file_id}_{safe_name}")
             with open(file_path, "wb") as f:
                 f.write(file.getbuffer())
                 m = MaterialInfo()
