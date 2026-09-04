@@ -846,7 +846,18 @@ Please note that you must use English for generating video search terms; Chinese
                 match = re.search(r"\[.*]", response, re.DOTALL)
                 if match:
                     try:
-                        search_terms = json.loads(match.group())
+                        extracted_terms = json.loads(match.group())
+                        # 与上面的主解析路径保持同一套校验。之前这里只做
+                        # json.loads，[1, 2, 3] 或 [{"t": "a"}] 也会被当成
+                        # 合法关键词返回，最终以非字符串的形式流到素材搜索。
+                        if isinstance(extracted_terms, list) and all(
+                            isinstance(term, str) for term in extracted_terms
+                        ):
+                            search_terms = extracted_terms
+                        else:
+                            logger.error(
+                                "extracted response is not a list of strings."
+                            )
                     except Exception as e:
                         # 这里保留重试流程，但必须记录 LLM 返回的非标准 JSON，
                         # 否则后续排查搜索词为空时无法定位
