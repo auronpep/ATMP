@@ -1587,6 +1587,13 @@ with right_panel:
 
         with col1:
             st.subheader(tr("Pexels API Keys"))
+
+            # 与下面 Coverr 分支保持一致：用户的 config.toml 里不一定有这个键
+            # （手动删掉、或者是更早版本留下的配置），直接索引会抛 KeyError，
+            # 而 Streamlit 是整页重跑，一个 KeyError 会让整个页面渲染失败。
+            if "pexels_api_keys" not in config.app or config.app["pexels_api_keys"] is None:
+                config.app["pexels_api_keys"] = []
+
             if config.app["pexels_api_keys"]:
                 st.write(tr("Current Keys:"))
                 for key in config.app["pexels_api_keys"]:
@@ -1616,6 +1623,12 @@ with right_panel:
 
         with col2:
             st.subheader(tr("Pixabay API Keys"))
+
+            # 与下面 Coverr 分支保持一致：用户的 config.toml 里不一定有这个键
+            # （手动删掉、或者是更早版本留下的配置），直接索引会抛 KeyError，
+            # 而 Streamlit 是整页重跑，一个 KeyError 会让整个页面渲染失败。
+            if "pixabay_api_keys" not in config.app or config.app["pixabay_api_keys"] is None:
+                config.app["pixabay_api_keys"] = []
 
             if config.app["pixabay_api_keys"]:
                 st.write(tr("Current Keys:"))
