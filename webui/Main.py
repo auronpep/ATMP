@@ -1405,7 +1405,11 @@ with middle_panel:
             index=2,
         )
 
-        custom_audio_file_types = ["mp3", "wav", "m4a", "aac", "flac", "ogg"]
+        # 与 voice.get_audio_duration 支持的格式保持同一来源，避免上传控件
+        # 放行了后端读不出时长的扩展名。
+        custom_audio_file_types = [
+            ext.lstrip(".") for ext in voice.AUDIO_FILE_EXTENSIONS
+        ]
         uploaded_audio_file = st.file_uploader(
             tr("Custom Audio File"),
             type=custom_audio_file_types
