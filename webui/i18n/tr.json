@@ -43,6 +43,8 @@
     "Landscape": "Yatay 16:9",
     "Clip Duration": "Video Kliplerinin Maksimum Süresi (saniye)",
     "Number of Videos Generated Simultaneously": "Aynı Anda Oluşturulan Video Sayısı",
+    "Match Materials to Script Order": "Materyalleri senaryo sırasına göre eşleştir",
+    "Match Materials to Script Order Help": "Varsayılan olarak kapalıdır. Esas olarak çevrimiçi materyal kaynakları için geçerlidir. Etkinleştirildiğinde anahtar kelimeler senaryo sırasına göre üretilir ve materyaller bu sırayla indirilip birleştirilir; böylece görüntü ile mevcut seslendirme arasındaki uyumsuzluk azalır.",
     "Audio Settings": "**Ses Ayarları**",
     "Speech Synthesis": "Konuşma Sentezi Sesi",
     "Speech Region": "Bölge (:red[Gerekli, [Bölge Al](https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/SpeechServices)])",
