@@ -1670,32 +1670,38 @@ def _get_audio_duration_from_submaker(sub_maker: SubMaker):
         return 0.0
     return legacy_offsets[-1][1] / 10000000
 
-def _get_audio_duration_from_mp3(mp3_file: str) -> float:
+# WebUI 的“自定义音频”上传控件接受这一组扩展名，并按原扩展名存进任务目录；
+# 这里必须覆盖同一组格式，否则上传 wav/m4a 之类的音频会被判定为 0 时长，
+# 任务直接失败。扩展名比较统一转小写，兼容 .MP3 这种大写后缀。
+AUDIO_FILE_EXTENSIONS = (".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg")
+
+
+def _get_audio_duration_from_file(audio_file: str) -> float:
     """
-    获取MP3音频时长
+    获取音频文件时长
     """
-    if not os.path.exists(mp3_file):
-        logger.error(f"MP3 file does not exist: {mp3_file}")
+    if not os.path.exists(audio_file):
+        logger.error(f"audio file does not exist: {audio_file}")
         return 0.0
 
     try:
-        # Use moviepy to get the duration of the MP3 file
-        with AudioFileClip(mp3_file) as audio:
+        # Use moviepy to get the duration of the audio file
+        with AudioFileClip(audio_file) as audio:
             return audio.duration  # Duration in seconds
     except Exception as e:
-        logger.error(f"Failed to get audio duration from MP3: {str(e)}")
+        logger.error(f"Failed to get audio duration from file: {str(e)}")
         return 0.0
 
 def get_audio_duration(target: Union[str, SubMaker]) -> float:
     """
     获取音频时长
     如果是SubMaker对象，则从SubMaker中获取时长
-    如果是MP3文件，则从MP3文件中获取时长
+    如果是音频文件，则从音频文件中获取时长
     """
     if isinstance(target, SubMaker):
         return _get_audio_duration_from_submaker(target)
-    elif isinstance(target, str) and target.endswith(".mp3"):
-        return _get_audio_duration_from_mp3(target)
+    elif isinstance(target, str) and target.lower().endswith(AUDIO_FILE_EXTENSIONS):
+        return _get_audio_duration_from_file(target)
     else:
         logger.error(f"Invalid target type: {type(target)}")
         return 0.0

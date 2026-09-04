@@ -956,3 +956,47 @@ if __name__ == "__main__":
     # python -m unittest test.services.test_voice.TestVoiceService.test_azure_tts_v1
     # python -m unittest test.services.test_voice.TestVoiceService.test_azure_tts_v2
     unittest.main() 
+
+
+class TestAudioDurationFileTypes(unittest.TestCase):
+    """
+    The WebUI accepts wav/m4a/aac/flac/ogg for the custom audio file and stores
+    them under their own extension, so ``get_audio_duration`` has to read them.
+    A rejected extension returns 0.0, which the task pipeline turns into
+    TASK_STATE_FAILED with a misleading "failed to get audio duration" message.
+    """
+
+    def _fake_clip(self, duration=2.5):
+        class _Clip:
+            def __init__(self, path):
+                self.duration = duration
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        return _Clip
+
+    def test_non_mp3_audio_extensions_are_read(self):
+        for name in ("a.wav", "a.m4a", "a.aac", "a.flac", "a.ogg"):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as tmp_dir:
+                audio_file = os.path.join(tmp_dir, name)
+                Path(audio_file).write_bytes(b"x")
+                with patch.object(vs, "AudioFileClip", self._fake_clip()):
+                    self.assertEqual(vs.get_audio_duration(audio_file), 2.5)
+
+    def test_extension_matching_is_case_insensitive(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            audio_file = os.path.join(tmp_dir, "NARRATION.MP3")
+            Path(audio_file).write_bytes(b"x")
+            with patch.object(vs, "AudioFileClip", self._fake_clip()):
+                self.assertEqual(vs.get_audio_duration(audio_file), 2.5)
+
+    def test_non_audio_string_is_still_rejected(self):
+        self.assertEqual(vs.get_audio_duration("script.txt"), 0.0)
+
+
+if __name__ == "__main__":
+    unittest.main()
