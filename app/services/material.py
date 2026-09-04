@@ -38,9 +38,13 @@ def _get_tls_verify() -> bool:
 def get_api_key(cfg_key: str):
     api_keys = config.app.get(cfg_key)
     if not api_keys:
+        # 绝对不能把 config.app 整个 dump 进异常信息。调用方会用
+        # logger.error(str(e)) 记录它，而 WebUI 把日志渲染到页面上、
+        # 容器部署又会把 stdout 收进日志系统，于是一个没配置的 key 就会
+        # 把所有已配置的密钥（LLM/TTS/素材站）一起泄露出去。
         raise ValueError(
-            f"\n\n##### {cfg_key} is not set #####\n\nPlease set it in the config.toml file: {config.config_file}\n\n"
-            f"{utils.to_json(config.app)}"
+            f"\n\n##### {cfg_key} is not set #####\n\n"
+            f"Please set it in the config.toml file: {config.config_file}\n\n"
         )
 
     # if only one key is provided, return it
