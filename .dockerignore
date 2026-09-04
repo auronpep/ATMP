@@ -21,6 +21,17 @@ __pycache__/
 .idea/
 logs/
 
+# Exclude toolchain/build caches created by scripts/Run-CI.ps1.
+# These hold a host-platform Python and a uv package cache; they are
+# useless inside the Linux image and add hundreds of MB to the context.
+.cache/
+.local/
+.tmp/
+node_modules/
+.vscode/
+debug/
+.codegraph/
+
 # Exclude version control system files
 .git/
 .gitignore
