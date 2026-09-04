@@ -179,7 +179,12 @@ def _generate_response(prompt: str) -> str:
             if llm_provider == "moonshot":
                 api_key = config.app.get("moonshot_api_key")
                 model_name = config.app.get("moonshot_model_name")
-                base_url = "https://api.moonshot.cn/v1"
+                # config.example.toml 里记录了 moonshot_base_url，但这里原本
+                # 硬编码了官方地址，导致用户配置的代理/网关地址被静默忽略。
+                # 这里与 ollama/openai/gemini 等分支保持同一套读取方式。
+                base_url = config.app.get("moonshot_base_url", "")
+                if not base_url:
+                    base_url = "https://api.moonshot.cn/v1"
             elif llm_provider == "ollama":
                 # api_key = config.app.get("openai_api_key")
                 api_key = "ollama"  # any string works but you are required to have one
