@@ -1,6 +1,7 @@
 """Application implementation - ASGI."""
 
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -31,6 +32,18 @@ def validation_exception_handler(request: Request, e: RequestValidationError):
     )
 
 
+@asynccontextmanager
+async def lifespan(instance: FastAPI):
+    """Startup/shutdown hooks.
+
+    `@app.on_event` is deprecated in FastAPI and emits a DeprecationWarning on
+    the pinned 0.136.3; lifespan handlers are the supported replacement.
+    """
+    logger.info("startup event")
+    yield
+    logger.info("shutdown event")
+
+
 def get_application() -> FastAPI:
     """Initialize FastAPI application.
 
@@ -43,6 +56,7 @@ def get_application() -> FastAPI:
         description=config.project_description,
         version=config.project_version,
         debug=False,
+        lifespan=lifespan,
     )
     instance.include_router(root_api_router)
     instance.add_exception_handler(HttpException, exception_handler)
@@ -87,13 +101,3 @@ app.mount(
 
 public_dir = utils.public_dir()
 app.mount("/", StaticFiles(directory=public_dir, html=True), name="")
-
-
-@app.on_event("shutdown")
-def shutdown_event():
-    logger.info("shutdown event")
-
-
-@app.on_event("startup")
-def startup_event():
-    logger.info("startup event")
