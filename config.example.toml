@@ -107,6 +107,12 @@ pollinations_api_key = ""
 pollinations_base_url = ""
 # Default model for text generation
 pollinations_model_name = "openai-fast"
+# Optional. Set to true to mark requests as private so they are excluded from
+# the public Pollinations feed.
+# pollinations_private = false
+# Optional. Referrer string sent with each request; some Pollinations tiers use
+# it for attribution or rate-limit identification.
+# pollinations_referrer = ""
 
 ########## Ollama Settings
 # No need to set it unless you want to use your own proxy
@@ -174,6 +180,9 @@ azure_api_version = "2024-02-15-preview"
 ########## Gemini API Key
 gemini_api_key = ""
 gemini_model_name = "gemini-2.5-flash"
+# Optional. Only set this to route Gemini through a proxy or compatible gateway;
+# leave empty to use the official endpoint.
+# gemini_base_url = ""
 
 ########## Grok API Key
 grok_api_key = ""
@@ -233,6 +242,26 @@ mimo_model_name = "mimo-v2.5-pro"
 mimo_tts_model_name = "mimo-v2.5-tts"
 # Optional natural language style prompt for MiMo TTS.
 mimo_tts_style_prompt = "请用自然、清晰、适合短视频旁白的语气朗读。"
+
+########## Cloudflare Workers AI
+# Set llm_provider = "cloudflare" to use these.
+# Create an API token at https://dash.cloudflare.com/profile/api-tokens
+# with the "Workers AI" permission.
+cloudflare_api_key = ""
+# Your Cloudflare account id, shown in the dashboard URL and on the account home page.
+cloudflare_account_id = ""
+# Model list: https://developers.cloudflare.com/workers-ai/models/
+cloudflare_model_name = "@cf/meta/llama-3-8b-instruct"
+
+########## ERNIE (文心一言)
+# Set llm_provider = "ernie" to use these. All three values are required.
+# Create an application at https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application
+# to obtain the API key (client id) and secret key (client secret).
+ernie_api_key = ""
+ernie_secret_key = ""
+# Full chat completion endpoint for the model you enabled; the access token is
+# appended automatically.
+ernie_base_url = ""
 
 ########## DeepSeek API Key
 # Visit https://platform.deepseek.com/api_keys to get your API key
@@ -324,6 +353,12 @@ endpoint = ""
 # material_directory = ""                    # Indicates that video materials will be downloaded to the default folder, the default folder is ./storage/cache_videos under the current project
 # material_directory = "/user/harry/videos"  # Indicates that video materials will be downloaded to a specified folder
 # material_directory = "task"                # Indicates that video materials will be downloaded to the current task's folder, this method does not allow sharing of already downloaded video materials
+
+# Default state of the WebUI "Match materials to script order" checkbox.
+# When enabled, search keywords are generated in script order and materials are
+# downloaded and combined in that order, so the footage tracks the narration
+# more closely. Mainly affects online material sources.
+# match_materials_to_script = false
 
 # 视频素材存放位置
 # material_directory = ""                    #表示将视频素材下载到默认的文件夹，默认文件夹为当前项目下的 ./storage/cache_videos
