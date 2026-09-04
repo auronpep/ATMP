@@ -189,20 +189,24 @@ support_locales = [
 
 
 def get_all_fonts():
+    # 后缀比较必须忽略大小写：用户手动放进 resource/fonts 的字体经常是
+    # Impact.TTF 这种大写后缀，区分大小写会让它在下拉框里直接消失，
+    # 而且没有任何提示。
     fonts = []
-    for root, dirs, files in os.walk(font_dir):
+    for _root, _dirs, files in os.walk(font_dir):
         for file in files:
-            if file.endswith(".ttf") or file.endswith(".ttc"):
+            if utils.parse_extension(file) in ("ttf", "ttc"):
                 fonts.append(file)
     fonts.sort()
     return fonts
 
 
 def get_all_songs():
+    # 同上：resource/songs 里的 Track.MP3 也必须能被识别。
     songs = []
-    for root, dirs, files in os.walk(song_dir):
+    for _root, _dirs, files in os.walk(song_dir):
         for file in files:
-            if file.endswith(".mp3"):
+            if utils.parse_extension(file) == "mp3":
                 songs.append(file)
     return songs
 
