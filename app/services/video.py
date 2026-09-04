@@ -438,8 +438,12 @@ def close_clip(clip):
             
         # close audio resources
         if hasattr(clip, 'audio') and clip.audio is not None:
-            if hasattr(clip.audio, 'reader') and clip.audio.reader is not None:
-                clip.audio.reader.close()
+            # 音轨本身可能是 CompositeAudioClip：它没有 .reader，真正持有
+            # ffmpeg 进程的是它的子 clip。只关 clip.audio.reader 会漏掉旁白
+            # 和 BGM 两个 AudioFileClip。这里递归处理，与下面 clips 子节点
+            # 的处理方式保持一致。
+            if clip.audio is not clip:
+                close_clip(clip.audio)
             del clip.audio
             
         # close mask resources
