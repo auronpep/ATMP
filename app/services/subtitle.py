@@ -221,19 +221,25 @@ def correct(subtitle_file, video_script):
             start_time = subtitle_items[subtitle_index][1].split(" --> ")[0]
             end_time = subtitle_items[subtitle_index][1].split(" --> ")[1]
             next_subtitle_index = subtitle_index + 1
+            # 缓存当前候选文本的相似度：上一轮循环已经把它算过一次
+            # （作为那一轮的"合并后"候选）。similarity() 是 O(n*m) 的
+            # 编辑距离，重复计算会让合并循环的开销翻倍。
+            combined_score = similarity(script_line, combined_subtitle)
 
             while next_subtitle_index < len(subtitle_items):
                 next_subtitle = subtitle_items[next_subtitle_index][2].strip()
-                if similarity(
+                merged_score = similarity(
                     script_line, combined_subtitle + " " + next_subtitle
-                ) > similarity(script_line, combined_subtitle):
+                )
+                if merged_score > combined_score:
                     combined_subtitle += " " + next_subtitle
+                    combined_score = merged_score
                     end_time = subtitle_items[next_subtitle_index][1].split(" --> ")[1]
                     next_subtitle_index += 1
                 else:
                     break
 
-            if similarity(script_line, combined_subtitle) > 0.8:
+            if combined_score > 0.8:
                 logger.warning(
                     f"Merged/Corrected - Script: {script_line}, Subtitle: {combined_subtitle}"
                 )
