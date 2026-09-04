@@ -1,7 +1,9 @@
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 # 测试文件直接运行时，也能从仓库根目录导入 app 包。
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -86,6 +88,52 @@ class TestSubtitleService(unittest.TestCase):
             items = subtitle.file_to_subtitles(str(subtitle_file))
 
         self.assertEqual([item[2] for item in items], ["Hello", "World"])
+
+
+class TestWhisperWordSegmentation(unittest.TestCase):
+    """`create()` must only break a sentence on punctuation that ENDS a word.
+
+    Whisper emits " 2.5" as one word. Matching the inner "." split the line
+    mid-number and silently deleted the digit behind the dot.
+    """
+
+    def _transcribe(self, spoken_words):
+        """Run create() against a fake model that emits `spoken_words`."""
+        words = []
+        for idx, text in enumerate(spoken_words):
+            words.append(
+                types.SimpleNamespace(word=text, start=float(idx), end=float(idx + 1))
+            )
+        segment = types.SimpleNamespace(
+            words=words, start=0.0, end=float(len(words))
+        )
+        info = types.SimpleNamespace(language="en", language_probability=1.0)
+        fake_model = types.SimpleNamespace(
+            transcribe=lambda *args, **kwargs: ([segment], info)
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            subtitle_file = Path(tmp_dir) / "out.srt"
+            with patch.object(subtitle, "model", fake_model):
+                subtitle.create("audio.mp3", str(subtitle_file))
+            return [item[2] for item in subtitle.file_to_subtitles(str(subtitle_file))]
+
+    def test_decimal_number_is_not_split_and_keeps_its_digits(self):
+        lines = self._transcribe(
+            [" The", " price", " is", " 2.5", " percent", " today."]
+        )
+
+        self.assertEqual(lines, ["The price is 2.5 percent today"])
+
+    def test_sentence_final_punctuation_still_breaks_the_line(self):
+        lines = self._transcribe([" Hello", " world.", " Goodbye", " now."])
+
+        self.assertEqual(lines, ["Hello world", "Goodbye now"])
+
+    def test_abbreviation_inside_a_word_does_not_break_the_line(self):
+        lines = self._transcribe([" Made", " in", " the", " U.S.A", " today."])
+
+        self.assertEqual(lines, ["Made in the U.S.A today"])
 
 
 if __name__ == "__main__":
