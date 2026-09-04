@@ -1,6 +1,7 @@
 import os
 import shutil
 import socket
+import tempfile
 
 import toml
 from loguru import logger
@@ -148,14 +149,34 @@ def load_config():
 
 
 def save_config():
-    with open(config_file, "w", encoding="utf-8") as f:
-        _cfg["app"] = app
-        _cfg["azure"] = azure
-        _cfg["siliconflow"] = siliconflow
-        _cfg["elevenlabs"] = elevenlabs
-        _cfg["chatterbox"] = chatterbox
-        _cfg["ui"] = ui
-        f.write(toml.dumps(_cfg))
+    _cfg["app"] = app
+    _cfg["azure"] = azure
+    _cfg["siliconflow"] = siliconflow
+    _cfg["elevenlabs"] = elevenlabs
+    _cfg["chatterbox"] = chatterbox
+    _cfg["ui"] = ui
+
+    # config.toml 保存着全部 API Key，而 WebUI 每次交互都会重写它。
+    # 直接用 "w" 打开会先把文件截断，序列化或写入过程中任何一次失败、
+    # 断电、进程被杀，都会让用户的密钥全部丢失。
+    # 因此先完成序列化，再写临时文件并原子替换。
+    content = toml.dumps(_cfg)
+    config_dir = os.path.dirname(config_file) or "."
+    fd, tmp_path = tempfile.mkstemp(
+        prefix=".config.", suffix=".toml.tmp", dir=config_dir
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, config_file)
+    except BaseException:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 _cfg = load_config()
