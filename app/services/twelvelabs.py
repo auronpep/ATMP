@@ -60,6 +60,18 @@ def _client():
 
 
 def _cosine(a: List[float], b: List[float]) -> float:
+    # Cosine similarity is only defined for vectors of equal dimension. `zip`
+    # would silently truncate to the shorter one while the norms below still use
+    # the full vectors, producing a plausible-looking but meaningless score --
+    # e.g. [1,0,0,0] vs [1,0] scores 1.0, a perfect match between vectors that
+    # are not even the same size.
+    if len(a) != len(b):
+        logger.warning(
+            f"TwelveLabs embedding dimension mismatch: {len(a)} vs {len(b)}; "
+            "treating similarity as 0"
+        )
+        return 0.0
+
     dot = sum(x * y for x, y in zip(a, b))
     na = math.sqrt(sum(x * x for x in a))
     nb = math.sqrt(sum(x * x for x in b))
@@ -121,6 +133,14 @@ def rerank_terms_by_subject(
         vec = embed_text(term, model)
         if vec is None:
             # If any term can't be embedded, don't risk a partial reorder.
+            return search_terms
+        if len(vec) != len(subject_vec):
+            # Same reasoning: a dimension mismatch means the scores are not
+            # comparable, so keep the original order instead of ranking on them.
+            logger.warning(
+                f"TwelveLabs returned a {len(vec)}-dim embedding for '{term}' but "
+                f"{len(subject_vec)}-dim for the subject; skipping rerank"
+            )
             return search_terms
         scored.append((term, _cosine(subject_vec, vec)))
 
