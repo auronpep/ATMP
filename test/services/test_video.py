@@ -19,7 +19,7 @@ from app.controllers.manager.base_manager import TaskQueueFullError
 from app.controllers.manager.memory_manager import InMemoryTaskManager
 from app.controllers.v1 import video as video_controller
 from app.models import const
-from app.models.schema import MaterialInfo
+from app.models.schema import MaterialInfo, VideoParams
 from app.services import state as sm
 from app.services import video as vd
 from app.utils import utils
@@ -637,3 +637,87 @@ class TestVideoService(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestGenerateVideoReleasesReaders(unittest.TestCase):
+    """Every ffmpeg-backed reader opened by generate_video must be closed.
+
+    ``CompositeAudioClip.close()`` is a no-op and ``CompositeVideoClip.close()``
+    only touches ``bg``/``audio``, so closing the outermost clip alone leaves the
+    source readers (and their ffmpeg subprocesses) running.
+    """
+
+    def _run(self, *, write_raises=False, with_bgm=True):
+        closed = getattr(self, "closed", [])
+
+        class FakeClip:
+            def __init__(self, name):
+                self.name = name
+                self.duration = 1.0
+                self.fps = 44100
+
+            def with_effects(self, _effects):
+                return self
+
+            def with_audio(self, _audio):
+                return self
+
+            def close(self):
+                closed.append(self.name)
+
+        voice = FakeClip("voice")
+        bgm = FakeClip("bgm")
+        source = FakeClip("source_video")
+
+        def fake_audiofileclip(path, *a, **kw):
+            return bgm if path == "bgm.mp3" else voice
+
+        def fake_write(clip, **kwargs):
+            if write_raises:
+                raise RuntimeError("encoder exploded")
+
+        params = VideoParams(video_subject="t")
+        params.voice_volume = 1.0
+        params.bgm_volume = 0.2
+        params.n_threads = 2
+
+        with patch.object(vd, "_open_video_clip_quietly", return_value=source), \
+             patch.object(vd, "AudioFileClip", fake_audiofileclip), \
+             patch.object(vd, "get_bgm_file", return_value="bgm.mp3" if with_bgm else ""), \
+             patch.object(vd, "_write_videofile_with_codec_fallback", fake_write), \
+             patch.object(vd, "_get_temp_audio_dir", return_value="."), \
+             patch.object(vd, "_get_configured_video_codec", return_value="libx264"), \
+             patch.object(vd.afx, "MultiplyVolume", lambda *a, **k: None), \
+             patch.object(vd.afx, "AudioFadeOut", lambda *a, **k: None), \
+             patch.object(vd.afx, "AudioLoop", lambda *a, **k: None), \
+             patch.object(vd, "CompositeAudioClip", lambda clips: clips[0]):
+            vd.generate_video(
+                video_path="in.mp4",
+                audio_path="voice.mp3",
+                subtitle_path="",
+                output_file="out.mp4",
+                params=params,
+            )
+        return closed
+
+    def test_source_video_and_audio_readers_are_closed(self):
+        closed = self._run()
+        self.assertIn("source_video", closed)
+        self.assertIn("voice", closed)
+
+    def test_bgm_reader_is_closed(self):
+        self.assertIn("bgm", self._run())
+
+    def test_readers_are_closed_even_when_encoding_fails(self):
+        self.closed = []
+        with self.assertRaises(RuntimeError):
+            self._run(write_raises=True)
+        self.assertIn("source_video", self.closed)
+        self.assertIn("voice", self.closed)
+        self.assertIn("bgm", self.closed)
+
+    def test_no_bgm_still_closes_the_rest(self):
+        closed = self._run(with_bgm=False)
+        self.assertIn("source_video", closed)
+        self.assertIn("voice", closed)
+        self.assertNotIn("bgm", closed)

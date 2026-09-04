@@ -1079,10 +1079,18 @@ def generate_video(
             _clip = _clip.with_position(("center", "center"))
         return _clip
 
+    # 每个 reader 都持有一个 ffmpeg 子进程和管道。Composite*Clip.close() 不会向下
+    # 传递到子 clip（CompositeAudioClip.close() 直接就是 pass），所以必须自己记下
+    # 这些源 clip 并逐个关闭，否则每渲染一个视频就泄漏若干 ffmpeg 进程，
+    # Windows 上还会因为句柄未释放导致 task 目录删不掉。
+    source_clips = []
+
     video_clip = _open_video_clip_quietly(video_path)
+    source_clips.append(video_clip)
     audio_clip = AudioFileClip(audio_path).with_effects(
         [afx.MultiplyVolume(params.voice_volume)]
     )
+    source_clips.append(audio_clip)
 
     def make_textclip(text):
         return TextClip(
@@ -1111,6 +1119,7 @@ def generate_video(
                     afx.AudioLoop(duration=video_clip.duration),
                 ]
             )
+            source_clips.append(bgm_clip)
             audio_clip = CompositeAudioClip([audio_clip, bgm_clip])
         except Exception as e:
             logger.error(f"failed to add bgm: {str(e)}")
@@ -1119,19 +1128,26 @@ def generate_video(
     # 显式沿用输入音频的采样率；如果取不到，再回退到 MoviePy 默认的 44100Hz。
     # 这样可以减少不同运行环境，尤其是 Docker 环境中再次重采样带来的音质波动。
     output_audio_fps = int(getattr(audio_clip, "fps", 0) or 44100)
-    _write_videofile_with_codec_fallback(
-        video_clip,
-        output_file=output_file,
-        codec=_get_configured_video_codec(),
-        audio_codec=audio_codec,
-        audio_fps=output_audio_fps,
-        audio_bitrate=audio_bitrate,
-        temp_audiofile_path=_get_temp_audio_dir(output_dir),
-        threads=params.n_threads or 2,
-        logger=None,
-        fps=fps,
-    )
-    video_clip.close()
+    try:
+        _write_videofile_with_codec_fallback(
+            video_clip,
+            output_file=output_file,
+            codec=_get_configured_video_codec(),
+            audio_codec=audio_codec,
+            audio_fps=output_audio_fps,
+            audio_bitrate=audio_bitrate,
+            temp_audiofile_path=_get_temp_audio_dir(output_dir),
+            threads=params.n_threads or 2,
+            logger=None,
+            fps=fps,
+        )
+    finally:
+        # 编码失败时同样要释放；否则失败任务留下的 ffmpeg 进程会一直堆积。
+        for clip in [video_clip, *source_clips]:
+            try:
+                clip.close()
+            except Exception as exc:
+                logger.warning(f"failed to close clip: {str(exc)}")
     del video_clip
 
 
