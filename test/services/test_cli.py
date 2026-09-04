@@ -179,7 +179,6 @@ class TestCli(unittest.TestCase):
     def test_local_material_filename_resolved_to_absolute_path(self):
         """After preprocess_video, material.url should be an absolute path, not a bare filename."""
         import os
-        import tempfile
         from app.utils import utils
         from app.services import video as vd
         from app.models.schema import MaterialInfo
