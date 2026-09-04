@@ -11,6 +11,9 @@ from openai.types.chat import ChatCompletion
 from app.config import config
 
 _max_retries = 5
+# (connect timeout, read timeout) for raw `requests` calls to LLM HTTP APIs.
+# Without a timeout a hung provider blocks the worker thread forever.
+_REQUEST_TIMEOUT = (10, 120)
 _DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 _DEPRECATED_GEMINI_MODELS = {"gemini-pro", "gemini-1.0-pro"}
 MIN_SCRIPT_PARAGRAPH_NUMBER = 1
@@ -339,7 +342,12 @@ def _generate_response(prompt: str) -> str:
                     }
                     
                     # Make the API request
-                    response = requests.post(base_url, headers=headers, json=payload)
+                    response = requests.post(
+                        base_url,
+                        headers=headers,
+                        json=payload,
+                        timeout=_REQUEST_TIMEOUT,
+                    )
                     response.raise_for_status()
                     result = response.json()
                     
@@ -462,6 +470,7 @@ def _generate_response(prompt: str) -> str:
                             {"role": "user", "content": prompt},
                         ]
                     },
+                    timeout=_REQUEST_TIMEOUT,
                 )
                 result = response.json()
                 logger.info(result)
@@ -474,7 +483,8 @@ def _generate_response(prompt: str) -> str:
                         "grant_type": "client_credentials",
                         "client_id": api_key,
                         "client_secret": secret_key,
-                    }
+                    },
+                    timeout=_REQUEST_TIMEOUT,
                 )
                 access_token = response.json().get("access_token")
                 url = f"{base_url}?access_token={access_token}"
