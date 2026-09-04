@@ -44,15 +44,22 @@ class TaskManager:
                 self.enqueue({"func": func, "args": args, "kwargs": kwargs})
 
     def execute_task(self, func: Callable, *args: Any, **kwargs: Any):
+        # 并发槽位必须在这里占用：调用方（add_task / check_queue）此时仍持有
+        # self.lock。如果等到工作线程里才 current_tasks += 1，下一个请求会读到
+        # 旧的计数并越过 max_concurrent_tasks，同时启动多个渲染任务。
+        self.current_tasks += 1
         thread = threading.Thread(
             target=self.run_task, args=(func, *args), kwargs=kwargs
         )
-        thread.start()
+        try:
+            thread.start()
+        except BaseException:
+            # 线程没起来就要归还槽位，否则计数永久性偏高，队列再也不会被消费。
+            self.current_tasks -= 1
+            raise
 
     def run_task(self, func: Callable, *args: Any, **kwargs: Any):
         try:
-            with self.lock:
-                self.current_tasks += 1
             func(*args, **kwargs)  # call the function here, passing *args and **kwargs.
         finally:
             self.task_done()
