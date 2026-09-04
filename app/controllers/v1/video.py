@@ -2,6 +2,7 @@ import glob
 import os
 import pathlib
 import shutil
+import tempfile
 from typing import Union
 
 from fastapi import BackgroundTasks, Depends, Path, Query, Request, UploadFile
@@ -37,6 +38,9 @@ from app.utils import file_security, utils
 # router = new_router(dependencies=[Depends(base.verify_token)])
 router = new_router()
 
+# 分块拷贝上传内容的块大小。
+_UPLOAD_CHUNK_SIZE = 1024 * 1024
+
 _enable_redis = config.app.get("enable_redis", False)
 _redis_host = config.app.get("redis_host", "localhost")
 _redis_port = config.app.get("redis_port", 6379)
@@ -58,6 +62,31 @@ else:
         max_concurrent_tasks=_max_concurrent_tasks,
         max_queued_tasks=_max_queued_tasks,
     )
+
+
+def _save_upload_atomically(upload: UploadFile, save_path: str) -> None:
+    """
+    将上传文件落盘。
+
+    1. 用 shutil.copyfileobj 分块拷贝，而不是 file.read() 一次性读进内存。
+       UploadFile 超过阈值后本身就落在临时文件上，整包读取会让一个大素材
+       直接变成同等大小的内存峰值。
+    2. 先写临时文件再 os.replace 原子替换。直接以 "wb+" 打开目标路径会先
+       把已有的同名文件截断，一旦上传中断，原来那份可用的素材就没了。
+    """
+    save_dir = os.path.dirname(save_path) or "."
+    fd, tmp_path = tempfile.mkstemp(prefix=".upload-", dir=save_dir)
+    try:
+        upload.file.seek(0)
+        with os.fdopen(fd, "wb") as buffer:
+            shutil.copyfileobj(upload.file, buffer, _UPLOAD_CHUNK_SIZE)
+        os.replace(tmp_path, save_path)
+    except BaseException:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 def _sanitize_upload_filename(filename: str, request_id: str) -> str:
@@ -267,11 +296,8 @@ def upload_bgm_file(request: Request, file: UploadFile = File(...)):
     if safe_filename.lower().endswith("mp3"):
         song_dir = utils.song_dir()
         save_path = os.path.join(song_dir, safe_filename)
-        # save file
-        with open(save_path, "wb+") as buffer:
-            # If the file already exists, it will be overwritten
-            file.file.seek(0)
-            buffer.write(file.file.read())
+        # save file (overwrites any existing file with the same name)
+        _save_upload_atomically(file, save_path)
         response = {"file": safe_filename}
         return utils.get_response(200, response)
 
@@ -322,11 +348,8 @@ def upload_video_material_file(request: Request, file: UploadFile = File(...)):
     if normalized_filename.endswith(allowed_suffixes):
         local_videos_dir = utils.storage_dir("local_videos", create=True)
         save_path = os.path.join(local_videos_dir, safe_filename)
-        # save file
-        with open(save_path, "wb+") as buffer:
-            # If the file already exists, it will be overwritten
-            file.file.seek(0)
-            buffer.write(file.file.read())
+        # save file (overwrites any existing file with the same name)
+        _save_upload_atomically(file, save_path)
         response = {"file": safe_filename}
         return utils.get_response(200, response)
 
