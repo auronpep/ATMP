@@ -115,6 +115,25 @@ class TestMaterialTlsVerification(unittest.TestCase):
             self.assertTrue(os.path.exists(video_path))
             self.assertTrue(get.call_args.kwargs["verify"])
 
+    def test_save_video_leaves_no_file_behind_when_download_fails(self):
+        """
+        下载中途失败时，不能在缓存路径上留下半截文件：否则下一次运行会被
+        `getsize(...) > 0` 的缓存判断直接命中，把损坏的素材当成好素材。
+        """
+        config.proxy.clear()
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with patch(
+                "app.services.material.requests.get",
+                side_effect=requests.exceptions.ConnectionError("boom"),
+            ):
+                with self.assertRaises(requests.exceptions.ConnectionError):
+                    material.save_video(
+                        "https://example.com/video.mp4", save_dir=temp_dir
+                    )
+
+            self.assertEqual(os.listdir(temp_dir), [])
+
     def test_download_videos_accepts_plain_string_concat_mode(self):
         """
         download_videos 可能被服务层或测试直接传入字符串模式，而不是
