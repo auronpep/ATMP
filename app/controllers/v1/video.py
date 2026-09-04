@@ -263,8 +263,10 @@ def get_bgm_list(request: Request):
 def upload_bgm_file(request: Request, file: UploadFile = File(...)):
     request_id = base.get_task_id(request)
     safe_filename = _sanitize_upload_filename(file.filename, request_id)
-    # check file ext
-    if safe_filename.lower().endswith("mp3"):
+    # 必须校验真正的扩展名。endswith("mp3") 会放行 "mp3"、"song.wavmp3"
+    # 这类没有 .mp3 后缀的文件名，它们能上传成功，却永远不会出现在
+    # GET /musics 的 *.mp3 列表里，最终只是留下一个用不了的死文件。
+    if utils.parse_extension(safe_filename) == "mp3":
         song_dir = utils.song_dir()
         save_path = os.path.join(song_dir, safe_filename)
         # save file
@@ -317,9 +319,10 @@ def upload_video_material_file(request: Request, file: UploadFile = File(...)):
     safe_filename = _sanitize_upload_filename(file.filename, request_id)
     # check file ext
     allowed_suffixes = ("mp4", "mov", "avi", "flv", "mkv", "jpg", "jpeg", "png")
-    normalized_filename = safe_filename.lower()
-    # 统一按小写扩展名校验，兼容 .MOV 这类大写后缀文件。
-    if normalized_filename.endswith(allowed_suffixes):
+    # parse_extension 已经统一转小写，兼容 .MOV 这类大写后缀；同时要求存在
+    # 真正的扩展名，避免 "mp4"、"clip.badmov" 这类文件被接收后无法被
+    # GET /video_materials 的 *.<suffix> 枚举到。
+    if utils.parse_extension(safe_filename) in allowed_suffixes:
         local_videos_dir = utils.storage_dir("local_videos", create=True)
         save_path = os.path.join(local_videos_dir, safe_filename)
         # save file
