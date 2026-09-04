@@ -1,5 +1,6 @@
 import os
 import random
+import tempfile
 import threading
 from typing import List
 from urllib.parse import urlencode
@@ -262,17 +263,30 @@ def save_video(video_url: str, save_dir: str = "") -> str:
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
     }
 
-    # if video does not exist, download it
-    with open(video_path, "wb") as f:
-        f.write(
-            requests.get(
-                video_url,
-                headers=headers,
-                proxies=config.proxy,
-                verify=_get_tls_verify(),
-                timeout=(60, 240),
-            ).content
-        )
+    # if video does not exist, download it into a unique temporary file and then
+    # move it into place atomically. Writing straight to `video_path` publishes a
+    # half-written file under the cached name if the process dies mid-write, or if
+    # two tasks download the same url into the shared cache directory at the same
+    # time - and the `getsize(...) > 0` cache check above would trust it forever.
+    fd, tmp_path = tempfile.mkstemp(prefix=f"{video_id}.", suffix=".part", dir=save_dir)
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(
+                requests.get(
+                    video_url,
+                    headers=headers,
+                    proxies=config.proxy,
+                    verify=_get_tls_verify(),
+                    timeout=(60, 240),
+                ).content
+            )
+        os.replace(tmp_path, video_path)
+    except Exception:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
 
     if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
         clip = None
