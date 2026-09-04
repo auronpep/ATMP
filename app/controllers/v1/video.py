@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 from fastapi import BackgroundTasks, Depends, Path, Query, Request, UploadFile
 from fastapi.params import File
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from loguru import logger
 
 from app.config import config
@@ -345,45 +345,112 @@ def upload_video_material_file(request: Request, file: UploadFile = File(...)):
         "", status_code=400, message=f"{request_id}: Only files with extensions {', '.join(allowed_suffixes)} can be uploaded"
     )
 
+RANGE_UNSATISFIABLE = object()
+_RANGE_UNIT_PREFIX = "bytes="
+
+
+def parse_range_header(range_header: str, file_size: int):
+    """
+    解析 HTTP Range 请求头，返回闭区间 (start, end)。
+
+    按 RFC 7233 处理三种结果：
+    * None —— 没有 Range、语法无法识别或不支持的形式（例如多段 range）。
+      这类请求必须被忽略并返回完整内容，而不是报错。
+    * RANGE_UNSATISFIABLE —— 语法合法但起点超出文件长度，应返回 416。
+    * (start, end) —— 可服务的区间，end 一定收敛在文件末尾之内。
+    """
+    if not range_header:
+        return None
+
+    value = range_header.strip()
+    if not value.lower().startswith(_RANGE_UNIT_PREFIX):
+        return None
+
+    spec = value[len(_RANGE_UNIT_PREFIX) :].strip()
+    # 多段 range 需要 multipart/byteranges 响应，这里不支持；按忽略处理，
+    # 返回完整内容依然是合法响应。
+    if "," in spec or "-" not in spec:
+        return None
+
+    start_text, _, end_text = spec.partition("-")
+    start_text, end_text = start_text.strip(), end_text.strip()
+
+    try:
+        if not start_text:
+            # 后缀形式 "bytes=-N"：请求最后 N 个字节。
+            suffix_length = int(end_text)
+            if suffix_length <= 0:
+                return None
+            start = max(file_size - suffix_length, 0)
+            end = file_size - 1
+        else:
+            start = int(start_text)
+            end = int(end_text) if end_text else file_size - 1
+    except ValueError:
+        return None
+
+    if start < 0:
+        return None
+    # 顺序很重要：开放式 "bytes=5000-" 会把 end 补成文件末尾，如果先判断
+    # end < start，就会把"起点越界"误判成语法错误并返回完整内容，而不是 416。
+    if start >= file_size:
+        return RANGE_UNSATISFIABLE
+    if end < start:
+        return None
+
+    # end 必须收敛到文件末尾，否则 Content-Length 会大于真正发送的字节数，
+    # 客户端会一直等待永远不会到达的数据。
+    return start, min(end, file_size - 1)
+
+
 @router.get("/stream/{file_path:path}")
 async def stream_video(request: Request, file_path: str):
     request_id = base.get_task_id(request)
     tasks_dir = utils.task_dir()
     video_path = _resolve_path_within_directory(tasks_dir, file_path, request_id)
-    range_header = request.headers.get("Range")
     video_size = os.path.getsize(video_path)
-    start, end = 0, video_size - 1
+    parsed_range = parse_range_header(request.headers.get("Range"), video_size)
 
-    length = video_size
-    if range_header:
-        range_ = range_header.split("bytes=")[1]
-        start, end = [int(part) if part else None for part in range_.split("-")]
-        if start is None:
-            start = video_size - end
-            end = video_size - 1
-        if end is None:
-            end = video_size - 1
+    if parsed_range is RANGE_UNSATISFIABLE:
+        return Response(
+            status_code=416,
+            headers={
+                "Content-Range": f"bytes */{video_size}",
+                "Accept-Ranges": "bytes",
+            },
+        )
+
+    if parsed_range is None:
+        start = 0
+        end = max(video_size - 1, 0)
+        length = video_size
+        status_code = 200
+    else:
+        start, end = parsed_range
         length = end - start + 1
+        status_code = 206
 
-    def file_iterator(file_path, offset=0, bytes_to_read=None):
-        with open(file_path, "rb") as f:
+    def file_iterator(offset: int, bytes_to_read: int):
+        if bytes_to_read <= 0:
+            return
+        with open(video_path, "rb") as f:
             f.seek(offset, os.SEEK_SET)
-            remaining = bytes_to_read or video_size
+            remaining = bytes_to_read
             while remaining > 0:
-                bytes_to_read = min(4096, remaining)
-                data = f.read(bytes_to_read)
+                data = f.read(min(64 * 1024, remaining))
                 if not data:
                     break
                 remaining -= len(data)
                 yield data
 
     response = StreamingResponse(
-        file_iterator(video_path, start, length), media_type="video/mp4"
+        file_iterator(start, length), media_type="video/mp4"
     )
-    response.headers["Content-Range"] = f"bytes {start}-{end}/{video_size}"
     response.headers["Accept-Ranges"] = "bytes"
     response.headers["Content-Length"] = str(length)
-    response.status_code = 206  # Partial Content
+    if status_code == 206:
+        response.headers["Content-Range"] = f"bytes {start}-{end}/{video_size}"
+    response.status_code = status_code
 
     return response
 
