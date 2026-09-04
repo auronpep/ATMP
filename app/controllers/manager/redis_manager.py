@@ -27,15 +27,19 @@ class RedisTaskManager(TaskManager):
         return "task_queue"
 
     def enqueue(self, task: Dict):
-        task_with_serializable_params = task.copy()
+        # dict.copy() 是浅拷贝，直接改 ["kwargs"]["params"] 会同时改掉调用方
+        # 传进来的那个 task：调用方手里的 VideoParams 会被替换成 dict。
+        # 这里单独复制一层 kwargs，让序列化真正只作用于要入队的副本。
+        task_with_serializable_params = dict(task)
+        serializable_kwargs = dict(task["kwargs"])
 
-        if "params" in task["kwargs"] and isinstance(
-            task["kwargs"]["params"], VideoParams
-        ):
-            task_with_serializable_params["kwargs"]["params"] = task["kwargs"][
-                "params"
-            ].dict()
+        params = serializable_kwargs.get("params")
+        if isinstance(params, VideoParams):
+            # Pydantic v2：.dict() 已废弃，V3 会移除；与 controllers 里的
+            # body.model_dump() 保持一致。
+            serializable_kwargs["params"] = params.model_dump()
 
+        task_with_serializable_params["kwargs"] = serializable_kwargs
         # 将函数对象转换为其名称
         task_with_serializable_params["func"] = task["func"].__name__
         self.redis_client.rpush(self.queue, json.dumps(task_with_serializable_params))
