@@ -76,9 +76,9 @@ class VideoParams(BaseModel):
     video_aspect: Optional[VideoAspect] = VideoAspect.portrait.value
     video_concat_mode: Optional[VideoConcatMode] = VideoConcatMode.random.value
     video_transition_mode: Optional[VideoTransitionMode] = None
-    video_clip_duration: Optional[int] = 5
+    video_clip_duration: Optional[int] = Field(default=5, ge=1)
     match_materials_to_script: bool = False
-    video_count: Optional[int] = 1
+    video_count: Optional[int] = Field(default=1, ge=1)
 
     video_source: Optional[str] = "pexels"
     video_materials: Optional[List[MaterialInfo]] = (
@@ -89,24 +89,24 @@ class VideoParams(BaseModel):
     video_language: Optional[str] = ""  # auto detect
 
     voice_name: Optional[str] = ""
-    voice_volume: Optional[float] = 1.0
+    voice_volume: Optional[float] = Field(default=1.0, ge=0)
     voice_rate: Optional[float] = 1.0
     bgm_type: Optional[str] = "random"
     bgm_file: Optional[str] = ""
-    bgm_volume: Optional[float] = 0.2
+    bgm_volume: Optional[float] = Field(default=0.2, ge=0)
 
     subtitle_enabled: Optional[bool] = True
     subtitle_position: Optional[str] = config.ui.get("subtitle_position", "bottom")  # top, bottom, center, custom
-    custom_position: float = config.ui.get("custom_position", 70.0)
+    custom_position: float = Field(default=config.ui.get("custom_position", 70.0), ge=0, le=100)
     font_name: Optional[str] = "STHeitiMedium.ttc"
     text_fore_color: Optional[str] = "#FFFFFF"
     text_background_color: Union[bool, str] = True
     rounded_subtitle_background: bool = False
 
-    font_size: int = 60
+    font_size: int = Field(default=60, ge=1)
     stroke_color: Optional[str] = "#000000"
-    stroke_width: float = 1.5
-    n_threads: Optional[int] = 2
+    stroke_width: float = Field(default=1.5, ge=0)
+    n_threads: Optional[int] = Field(default=2, ge=1)
     paragraph_number: int = Field(default=1, ge=1, le=10)
     video_script_prompt: str = Field(default="", max_length=2000)
     custom_system_prompt: str = Field(default="", max_length=8000)
@@ -116,19 +116,19 @@ class SubtitleRequest(BaseModel):
     video_script: str
     video_language: Optional[str] = ""
     voice_name: Optional[str] = "zh-CN-XiaoxiaoNeural-Female"
-    voice_volume: Optional[float] = 1.0
+    voice_volume: Optional[float] = Field(default=1.0, ge=0)
     voice_rate: Optional[float] = 1.2
     bgm_type: Optional[str] = "random"
     bgm_file: Optional[str] = ""
-    bgm_volume: Optional[float] = 0.2
+    bgm_volume: Optional[float] = Field(default=0.2, ge=0)
     subtitle_position: Optional[str] = config.ui.get("subtitle_position", "bottom")
     font_name: Optional[str] = "STHeitiMedium.ttc"
     text_fore_color: Optional[str] = "#FFFFFF"
     text_background_color: Union[bool, str] = True
     rounded_subtitle_background: bool = False
-    font_size: int = 60
+    font_size: int = Field(default=60, ge=1)
     stroke_color: Optional[str] = "#000000"
-    stroke_width: float = 1.5
+    stroke_width: float = Field(default=1.5, ge=0)
     video_source: Optional[str] = "local"
     subtitle_enabled: Optional[str] = "true"
 
@@ -137,11 +137,11 @@ class AudioRequest(BaseModel):
     video_script: str
     video_language: Optional[str] = ""
     voice_name: Optional[str] = "zh-CN-XiaoxiaoNeural-Female"
-    voice_volume: Optional[float] = 1.0
+    voice_volume: Optional[float] = Field(default=1.0, ge=0)
     voice_rate: Optional[float] = 1.2
     bgm_type: Optional[str] = "random"
     bgm_file: Optional[str] = ""
-    bgm_volume: Optional[float] = 0.2
+    bgm_volume: Optional[float] = Field(default=0.2, ge=0)
     video_source: Optional[str] = "local"
 
 
