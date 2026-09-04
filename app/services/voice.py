@@ -396,9 +396,11 @@ def tts(
         # 从voice_name中提取声音名称
         # 格式: gemini:voice-Gender
         parts = voice_name.split(":")
-        if len(parts) >= 2:
+        # 同时要求声音段非空：只有 "gemini:" 时 parts[1] 是空串，继续下发会
+        # 用空 voice 调用服务商，错误只能以远端 API 报错的形式出现。
+        if len(parts) >= 2 and parts[1].strip():
             # 移除性别后缀，例如 "Zephyr-Female" -> "Zephyr"
-            voice_with_gender = parts[1]
+            voice_with_gender = parts[1].strip()
             voice = voice_with_gender.split("-")[0]
             return gemini_tts(text, voice, voice_rate, voice_file, voice_volume)
         else:
@@ -409,8 +411,8 @@ def tts(
         # 格式: mimo:voice-Gender；如果调用方已执行 parse_voice_name，
         # 则可能是 mimo:voice。两种格式都兼容。
         parts = voice_name.split(":")
-        if len(parts) >= 2:
-            voice_with_gender = parts[1]
+        if len(parts) >= 2 and parts[1].strip():
+            voice_with_gender = parts[1].strip()
             voice = voice_with_gender.split("-")[0]
             return mimo_tts(text, voice, voice_rate, voice_file, voice_volume)
         else:
@@ -419,8 +421,8 @@ def tts(
     elif is_elevenlabs_voice(voice_name):
         # 格式: elevenlabs:{voice_id}:{name}
         parts = voice_name.split(":")
-        if len(parts) >= 2:
-            voice_id = parts[1]
+        if len(parts) >= 2 and parts[1].strip():
+            voice_id = parts[1].strip()
             return elevenlabs_tts(text, voice_id, voice_file, voice_rate, voice_volume)
         else:
             logger.error(f"Invalid elevenlabs voice name format: {voice_name}")
