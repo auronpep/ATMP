@@ -3,6 +3,7 @@ import os
 import pathlib
 import shutil
 from typing import Union
+from urllib.parse import quote
 
 from fastapi import BackgroundTasks, Depends, Path, Query, Request, UploadFile
 from fastapi.params import File
@@ -45,7 +46,17 @@ _redis_password = config.app.get("redis_password", None)
 _max_concurrent_tasks = config.app.get("max_concurrent_tasks", 5)
 _max_queued_tasks = config.app.get("max_queued_tasks", 100)
 
-redis_url = f"redis://:{_redis_password}@{_redis_host}:{_redis_port}/{_redis_db}"
+def _build_redis_url(host: str, port, db, password) -> str:
+    # The password must be percent-encoded: a literal "@", ":" or "/" inside it
+    # splits the authority section and redis-py then parses a wrong host/port.
+    # An unset password must be omitted entirely, otherwise an f-string turns
+    # None into the literal password "None" and AUTH fails against a
+    # password-less server.
+    credentials = f":{quote(str(password), safe='')}@" if password else ""
+    return f"redis://{credentials}{host}:{port}/{db}"
+
+
+redis_url = _build_redis_url(_redis_host, _redis_port, _redis_db, _redis_password)
 # 根据配置选择合适的任务管理器
 if _enable_redis:
     task_manager = RedisTaskManager(
