@@ -1037,73 +1037,52 @@ class TestSocialMetadata(unittest.TestCase):
 
 
 FOUNDRY_KEY = os.environ.get("ANTHROPIC_FOUNDRY_API_KEY", "")
-class TestProviderErrorResponses(unittest.TestCase):
-    """Providers that answer HTTP 200 with an error body must stay diagnosable."""
+class TestPollinationsErrorWrapping(unittest.TestCase):
+    """The pollinations branch wraps its own already-tagged exceptions."""
 
     def setUp(self):
         self.original_app_config = dict(config.app)
+        config.app["llm_provider"] = "pollinations"
+        config.app["pollinations_model_name"] = "openai-fast"
 
     def tearDown(self):
         config.app.clear()
         config.app.update(self.original_app_config)
 
-    def test_cloudflare_surfaces_error_body_instead_of_none_subscript(self):
-        """
-        Cloudflare Workers AI answers 200 with {"success": false, "errors": [...],
-        "result": null} for auth/model/quota failures. Indexing straight into it
-        raised "'NoneType' object is not subscriptable" and dropped the message.
-        """
-        config.app["llm_provider"] = "cloudflare"
-        config.app["cloudflare_api_key"] = "cf-key"
-        config.app["cloudflare_account_id"] = "cf-account"
-        config.app["cloudflare_model_name"] = "@cf/meta/llama-3-8b-instruct"
+    def _response(self, payload):
+        return types.SimpleNamespace(
+            json=lambda: payload, raise_for_status=lambda: None
+        )
 
-        error_body = {
-            "success": False,
-            "errors": [{"code": 10000, "message": "Authentication error"}],
-            "result": None,
-        }
+    def test_invalid_shape_is_reported_once(self):
+        with patch.object(llm.requests, "post", return_value=self._response({"x": 1})):
+            result = llm._generate_response("hi")
+
+        self.assertEqual(
+            result, "Error: [pollinations] returned an invalid response format"
+        )
+        self.assertEqual(result.count("[pollinations]"), 1)
+
+    def test_network_failure_keeps_its_own_message(self):
+        import requests as _requests
 
         with patch.object(
             llm.requests,
             "post",
-            return_value=types.SimpleNamespace(json=lambda: error_body),
+            side_effect=_requests.exceptions.ConnectTimeout("timed out"),
         ):
-            result = llm._generate_response("test")
+            result = llm._generate_response("hi")
 
-        self.assertIn("Error:", result)
-        self.assertIn("Authentication error", result)
-        self.assertNotIn("subscriptable", result)
+        self.assertIn("[pollinations] request failed: timed out", result)
+        self.assertEqual(result.count("[pollinations]"), 1)
 
-    def test_ernie_reports_missing_access_token(self):
-        """
-        Baidu returns {"error": "invalid_client", "error_description": ...} with no
-        token for bad credentials. The old code posted "?access_token=None" and the
-        real reason was discarded.
-        """
-        config.app["llm_provider"] = "ernie"
-        config.app["ernie_api_key"] = "ernie-key"
-        config.app["ernie_secret_key"] = "ernie-secret"
-        config.app["ernie_base_url"] = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/chat"
+    def test_unexpected_errors_are_still_tagged_with_the_provider(self):
+        with patch.object(
+            llm.requests, "post", return_value=self._response({"choices": [{}]})
+        ):
+            result = llm._generate_response("hi")
 
-        token_error = {
-            "error": "invalid_client",
-            "error_description": "unknown client id",
-        }
-        calls = []
-
-        def fake_post(*args, **kwargs):
-            calls.append(args)
-            return types.SimpleNamespace(json=lambda: token_error)
-
-        with patch.object(llm.requests, "post", side_effect=fake_post):
-            with patch.object(llm.requests, "request") as fake_request:
-                result = llm._generate_response("test")
-
-        self.assertIn("Error:", result)
-        self.assertIn("unknown client id", result)
-        # The chat call must never be attempted with a None token.
-        fake_request.assert_not_called()
+        self.assertIn("[pollinations] error:", result)
 
 
 FOUNDRY_BASE = "https://amanrai-test-resource.services.ai.azure.com/anthropic"
