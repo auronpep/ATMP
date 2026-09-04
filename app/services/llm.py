@@ -360,12 +360,21 @@ def _generate_response(prompt: str) -> str:
                         content = result["choices"][0]["message"]["content"]
                         return _normalize_text_response(content, llm_provider)
                     else:
-                        raise Exception(f"[{llm_provider}] returned an invalid response format")
-                        
+                        raise ValueError(
+                            f"[{llm_provider}] returned an invalid response format"
+                        )
+
                 except requests.exceptions.RequestException as e:
-                    raise Exception(f"[{llm_provider}] request failed: {str(e)}")
+                    raise ValueError(
+                        f"[{llm_provider}] request failed: {str(e)}"
+                    ) from e
+                except (ValueError, TypeError):
+                    # 这一层 try 里抛出的错误（以及 _normalize_text_response
+                    # 抛出的错误）已经带了 provider 前缀，再包一层会得到
+                    # "[x] error: [x] ..." 这种重复前缀，并且丢掉原始 traceback。
+                    raise
                 except Exception as e:
-                    raise Exception(f"[{llm_provider}] error: {str(e)}")
+                    raise ValueError(f"[{llm_provider}] error: {str(e)}") from e
 
             elif llm_provider == "litellm":
                 model_name = config.app.get("litellm_model_name")
