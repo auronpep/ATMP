@@ -82,6 +82,18 @@ class UploadPostService:
                 response.raise_for_status()
                 result = response.json()
 
+                # 服务端异常时可能返回数组或字符串。直接 .get() 会抛
+                # AttributeError，而这个异常不属于 RequestException，
+                # 会一路冒泡到 task.start() 里未加保护的跨平台发布循环。
+                if not isinstance(result, dict):
+                    logger.error(
+                        f"Cross-post returned an unexpected response type: {type(result).__name__}"
+                    )
+                    return {
+                        "success": False,
+                        "error": f"unexpected response type: {type(result).__name__}",
+                    }
+
                 if result.get('success'):
                     logger.info(f"✅ Video cross-posted successfully! Request ID: {result.get('request_id')}")
                 else:

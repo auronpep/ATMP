@@ -460,11 +460,22 @@ def start(task_id, params: VideoParams, stop_at: str = "video"):
             }
 
         for video_path in final_video_paths:
-            result = upload_post.cross_post_video(
-                video_path=video_path,
-                title=params.video_subject or "Check out this video! #shorts #viral",
-                youtube_extra=youtube_extra,
-            )
+            # 跨平台发布属于收尾步骤，视频这时已经渲染完成并落盘。
+            # 这一步的任何失败都不能让整个任务异常退出，否则任务永远
+            # 停在 PROCESSING，用户拿不到已经生成好的视频。
+            try:
+                result = upload_post.cross_post_video(
+                    video_path=video_path,
+                    title=params.video_subject or "Check out this video! #shorts #viral",
+                    youtube_extra=youtube_extra,
+                )
+            except Exception as e:
+                logger.error(f"cross-post raised for {video_path}: {str(e)}")
+                result = {"success": False, "error": str(e)}
+
+            if not isinstance(result, dict):
+                result = {"success": False, "error": "unexpected cross-post result"}
+
             cross_post_results.append(result)
             if result.get('success'):
                 logger.info(f"✅ Cross-posted: {video_path}")
