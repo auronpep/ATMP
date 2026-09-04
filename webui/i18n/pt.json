@@ -36,6 +36,8 @@
     "Landscape": "Paisagem 16:9",
     "Clip Duration": "Duração Máxima dos Clipes de Vídeo (segundos)",
     "Number of Videos Generated Simultaneously": "Número de Vídeos Gerados Simultaneamente",
+    "Match Materials to Script Order": "Corresponder as mídias à ordem do roteiro",
+    "Match Materials to Script Order Help": "Desativado por padrão. Aplica-se principalmente a fontes de mídia online. Quando ativado, as palavras-chave são geradas na ordem do roteiro e as mídias são baixadas e combinadas nessa ordem, reduzindo a incompatibilidade visual com a narração atual.",
     "Audio Settings": "**Configurações de Áudio**",
     "Speech Synthesis": "Voz de Síntese de Fala",
     "Speech Region": "Região(:red[Obrigatório，[Obter Região](https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/SpeechServices)])",
