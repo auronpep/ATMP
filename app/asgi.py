@@ -52,13 +52,30 @@ def get_application() -> FastAPI:
 
 app = get_application()
 
+
+def resolve_cors_settings(raw_allowed_origins: str) -> tuple[list[str], bool]:
+    """Resolve (allow_origins, allow_credentials) from CORS_ALLOWED_ORIGINS.
+
+    `allow_origins=["*"]` together with `allow_credentials=True` does NOT send a
+    literal `*`. Starlette echoes back whichever Origin the caller sent and adds
+    `Access-Control-Allow-Credentials: true`, so any website a user visits could
+    drive this API with their cookies and read the responses. Credentials are
+    therefore only enabled when an explicit allowlist is configured.
+    """
+    origins = [origin.strip() for origin in raw_allowed_origins.split(",") if origin.strip()]
+    if origins:
+        return origins, True
+    return ["*"], False
+
+
 # Configures the CORS middleware for the FastAPI app
-cors_allowed_origins_str = os.getenv("CORS_ALLOWED_ORIGINS", "")
-origins = cors_allowed_origins_str.split(",") if cors_allowed_origins_str else ["*"]
+cors_allowed_origins, cors_allow_credentials = resolve_cors_settings(
+    os.getenv("CORS_ALLOWED_ORIGINS", "")
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=cors_allowed_origins,
+    allow_credentials=cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
