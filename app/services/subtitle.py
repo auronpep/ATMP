@@ -97,9 +97,10 @@ def create(audio_file, subtitle_file: str = ""):
                 # If it contains punctuation, then break the sentence.
                 seg_text += word.word
 
-                if utils.str_contains_punctuation(word.word):
-                    # remove last char
-                    seg_text = seg_text[:-1]
+                trailing_punctuation = utils.get_trailing_punctuation(word.word)
+                if trailing_punctuation:
+                    # remove the punctuation that ended the word
+                    seg_text = seg_text.rstrip()[: -len(trailing_punctuation)]
                     if not seg_text:
                         continue
 

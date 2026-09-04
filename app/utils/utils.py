@@ -197,6 +197,25 @@ def str_contains_punctuation(word):
     return False
 
 
+def get_trailing_punctuation(word: str) -> str:
+    """Return the punctuation that ends ``word``, or "" when there is none.
+
+    Only punctuation at the END of a word marks a sentence boundary. Whisper
+    emits values such as " 2.5" or " U.S." as a single word, so matching
+    punctuation anywhere inside the word breaks a sentence mid-number and
+    deletes the character that follows the dot.
+
+    The longest match wins so "..." is stripped whole instead of leaving "..".
+    """
+    stripped = word.rstrip()
+    if not stripped:
+        return ""
+    for p in sorted(const.PUNCTUATIONS, key=len, reverse=True):
+        if stripped.endswith(p):
+            return p
+    return ""
+
+
 def split_string_by_punctuations(s):
     result = []
     txt = ""
