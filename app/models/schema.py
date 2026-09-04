@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any, List, Optional, Union
 
 import pydantic
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.config import config
 
@@ -44,11 +44,11 @@ class VideoAspect(str, Enum):
         raise ValueError(f"unsupported video aspect: {self}")
 
 
-class _Config:
-    arbitrary_types_allowed = True
+# Pydantic v2 期望 ConfigDict；class-based config 在 V3 会被移除。
+_MATERIAL_INFO_CONFIG = ConfigDict(arbitrary_types_allowed=True)
 
 
-@pydantic.dataclasses.dataclass(config=_Config)
+@pydantic.dataclasses.dataclass(config=_MATERIAL_INFO_CONFIG)
 class MaterialInfo:
     provider: str = "pexels"
     url: str = ""
@@ -233,150 +233,140 @@ class TaskResponse(BaseResponse):
 
     data: TaskResponseData
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {"task_id": "6c85c8cc-a77a-42b9-bc30-947815aa0558"},
-            },
-        }
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {"task_id": "6c85c8cc-a77a-42b9-bc30-947815aa0558"},
+        },
+    })
 
 
 class TaskQueryResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {
-                    "state": 1,
-                    "progress": 100,
-                    "videos": [
-                        "http://127.0.0.1:8080/tasks/6c85c8cc-a77a-42b9-bc30-947815aa0558/final-1.mp4"
-                    ],
-                    "combined_videos": [
-                        "http://127.0.0.1:8080/tasks/6c85c8cc-a77a-42b9-bc30-947815aa0558/combined-1.mp4"
-                    ],
-                },
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {
+                "state": 1,
+                "progress": 100,
+                "videos": [
+                    "http://127.0.0.1:8080/tasks/6c85c8cc-a77a-42b9-bc30-947815aa0558/final-1.mp4"
+                ],
+                "combined_videos": [
+                    "http://127.0.0.1:8080/tasks/6c85c8cc-a77a-42b9-bc30-947815aa0558/combined-1.mp4"
+                ],
             },
-        }
+        },
+    })
 
 
 class TaskDeletionResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {
-                    "state": 1,
-                    "progress": 100,
-                    "videos": [
-                        "http://127.0.0.1:8080/tasks/6c85c8cc-a77a-42b9-bc30-947815aa0558/final-1.mp4"
-                    ],
-                    "combined_videos": [
-                        "http://127.0.0.1:8080/tasks/6c85c8cc-a77a-42b9-bc30-947815aa0558/combined-1.mp4"
-                    ],
-                },
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {
+                "state": 1,
+                "progress": 100,
+                "videos": [
+                    "http://127.0.0.1:8080/tasks/6c85c8cc-a77a-42b9-bc30-947815aa0558/final-1.mp4"
+                ],
+                "combined_videos": [
+                    "http://127.0.0.1:8080/tasks/6c85c8cc-a77a-42b9-bc30-947815aa0558/combined-1.mp4"
+                ],
             },
-        }
+        },
+    })
 
 
 class VideoScriptResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {
-                    "video_script": "春天的花海，是大自然的一幅美丽画卷。在这个季节里，大地复苏，万物生长，花朵争相绽放，形成了一片五彩斑斓的花海..."
-                },
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {
+                "video_script": "春天的花海，是大自然的一幅美丽画卷。在这个季节里，大地复苏，万物生长，花朵争相绽放，形成了一片五彩斑斓的花海..."
             },
-        }
+        },
+    })
 
 
 class VideoTermsResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {"video_terms": ["sky", "tree"]},
-            },
-        }
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {"video_terms": ["sky", "tree"]},
+        },
+    })
 
 
 class VideoSocialMetadataResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {
-                    "title": "A Day in Shanghai You Should Not Miss",
-                    "caption": "Save this quick Shanghai inspiration and follow for more short travel ideas.",
-                    "hashtags": ["#shorts", "#travel", "#shanghai", "#viral", "#fyp"],
-                },
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {
+                "title": "A Day in Shanghai You Should Not Miss",
+                "caption": "Save this quick Shanghai inspiration and follow for more short travel ideas.",
+                "hashtags": ["#shorts", "#travel", "#shanghai", "#viral", "#fyp"],
             },
-        }
+        },
+    })
 
 
 class BgmRetrieveResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {
-                    "files": [
-                        {
-                            "name": "output013.mp3",
-                            "size": 1891269,
-                            "file": "/MoneyPrinterTurbo/resource/songs/output013.mp3",
-                        }
-                    ]
-                },
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {
+                "files": [
+                    {
+                        "name": "output013.mp3",
+                        "size": 1891269,
+                        "file": "/MoneyPrinterTurbo/resource/songs/output013.mp3",
+                    }
+                ]
             },
-        }
+        },
+    })
 
 
 class BgmUploadResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {"file": "/MoneyPrinterTurbo/resource/songs/example.mp3"},
-            },
-        }
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {"file": "/MoneyPrinterTurbo/resource/songs/example.mp3"},
+        },
+    })
 
 class VideoMaterialRetrieveResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {
-                    "files": [
-                        {
-                            "name": "example.mp4",
-                            "size": 12345678,
-                            "file": "/MoneyPrinterTurbo/resource/videos/example.mp4",
-                        }
-                    ]
-                },
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {
+                "files": [
+                    {
+                        "name": "example.mp4",
+                        "size": 12345678,
+                        "file": "/MoneyPrinterTurbo/resource/videos/example.mp4",
+                    }
+                ]
             },
-        }
+        },
+    })
 
 class VideoMaterialUploadResponse(BaseResponse):
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": 200,
-                "message": "success",
-                "data": {
-                    "file": "/MoneyPrinterTurbo/resource/videos/example.mp4",
-                },
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": 200,
+            "message": "success",
+            "data": {
+                "file": "/MoneyPrinterTurbo/resource/videos/example.mp4",
             },
-        }
+        },
+    })
