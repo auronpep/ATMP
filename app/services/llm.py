@@ -465,7 +465,17 @@ def _generate_response(prompt: str) -> str:
                 )
                 result = response.json()
                 logger.info(result)
-                return _normalize_text_response(result["result"]["response"], llm_provider)
+                # On failure Cloudflare answers 200 with {"success": false,
+                # "errors": [...], "result": null}. Indexing straight into it
+                # raises "'NoneType' object is not subscriptable" and throws the
+                # real message away, so read it defensively and report it.
+                content = (result.get("result") or {}).get("response")
+                if content is None:
+                    raise ValueError(
+                        f"[{llm_provider}] returned an error response: "
+                        f"{result.get('errors') or result}"
+                    )
+                return _normalize_text_response(content, llm_provider)
 
             if llm_provider == "ernie":
                 response = requests.post(
@@ -476,7 +486,17 @@ def _generate_response(prompt: str) -> str:
                         "client_secret": secret_key,
                     }
                 )
-                access_token = response.json().get("access_token")
+                token_response = response.json()
+                access_token = token_response.get("access_token")
+                # Bad credentials come back as {"error": "invalid_client", ...}
+                # with no token. Without this guard the code posts
+                # "?access_token=None" and the failure resurfaces one call later
+                # as an opaque auth error, with the real reason discarded.
+                if not access_token:
+                    raise ValueError(
+                        f"[{llm_provider}] failed to obtain an access token: "
+                        f"{token_response.get('error_description') or token_response}"
+                    )
                 url = f"{base_url}?access_token={access_token}"
 
                 payload = json.dumps(
