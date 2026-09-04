@@ -48,6 +48,15 @@ def generate_terms(task_id, params, video_script):
             amount=8 if params.match_materials_to_script else 5,
             match_script_order=params.match_materials_to_script,
         )
+        # llm.generate_terms 在底层 LLM 调用失败时会直接返回 "Error: ..."
+        # 字符串而不是列表。必须在这里拦截：字符串同样是可迭代对象，
+        # 下游会把它逐个字符当成搜索词发给素材站，既浪费配额又拿不到
+        # 任何有效素材，真正的错误原因也被彻底埋掉。
+        # 这与 generate_script() 里已有的 "Error: " 检查保持一致。
+        if not isinstance(video_terms, list):
+            sm.state.update_task(task_id, state=const.TASK_STATE_FAILED)
+            logger.error(f"failed to generate video terms: {video_terms}")
+            return None
     else:
         if isinstance(video_terms, str):
             video_terms = [term.strip() for term in re.split(r"[,，]", video_terms)]
