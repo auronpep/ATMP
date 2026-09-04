@@ -85,20 +85,29 @@ def search_videos_pexels(
             return video_items
         videos = response["videos"]
         # loop through each video in the result
+        # 逐条解析并跳过异常条目。之前所有字段都用 [] 直接取值，只要某个
+        # 结果缺字段，异常就会冒泡到外层 except，把这一批已经解析好的素材
+        # 全部丢掉并返回空列表。这里沿用本文件 coverr 分支已有的写法。
         for v in videos:
-            duration = v["duration"]
+            try:
+                duration = int(float(v.get("duration") or 0))
+            except (TypeError, ValueError):
+                continue
             # check if video has desired minimum duration
             if duration < minimum_duration:
                 continue
-            video_files = v["video_files"]
             # loop through each url to determine the best quality
-            for video in video_files:
-                w = int(video["width"])
-                h = int(video["height"])
-                if w == video_width and h == video_height:
+            for video in v.get("video_files") or []:
+                try:
+                    w = int(video["width"])
+                    h = int(video["height"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                link = video.get("link")
+                if link and w == video_width and h == video_height:
                     item = MaterialInfo()
                     item.provider = "pexels"
-                    item.url = video["link"]
+                    item.url = link
                     item.duration = duration
                     video_items.append(item)
                     break
@@ -140,21 +149,28 @@ def search_videos_pixabay(
             return video_items
         videos = response["hits"]
         # loop through each video in the result
+        # 同 pexels 分支：单条结果异常不能影响整批素材。
         for v in videos:
-            duration = v["duration"]
+            try:
+                duration = int(float(v.get("duration") or 0))
+            except (TypeError, ValueError):
+                continue
             # check if video has desired minimum duration
             if duration < minimum_duration:
                 continue
-            video_files = v["videos"]
+            video_files = v.get("videos") or {}
             # loop through each url to determine the best quality
             for video_type in video_files:
-                video = video_files[video_type]
-                w = int(video["width"])
-                # h = int(video["height"])
-                if w >= video_width:
+                video = video_files[video_type] or {}
+                try:
+                    w = int(video["width"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                url = video.get("url")
+                if url and w >= video_width:
                     item = MaterialInfo()
                     item.provider = "pixabay"
-                    item.url = video["url"]
+                    item.url = url
                     item.duration = duration
                     video_items.append(item)
                     break
